@@ -1,0 +1,21 @@
+# 运行时数据（含 API Key，绝不入库）
+data/
+*.db
+*.db-shm
+*.db-wal
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+
+# 编辑器
+.vscode/
+.idea/
+
+# 参考副本（原项目源码导出的勘察文件，体积大）
+tools/_ref_*.md

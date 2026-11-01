@@ -1,0 +1,6 @@
+# 统一换行，避免 Windows 上提交出 CRLF 噪音
+* text=auto eol=lf
+
+# 前端 vendor 文件不参与 diff 统计
+public/vendor/* linguist-vendored
+uv.lock linguist-generated

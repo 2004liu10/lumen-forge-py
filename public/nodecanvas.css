@@ -1,0 +1,2694 @@
+/* 节点画布 + 本地素材库：扁平风格，靠表面色和 1px 描边分层，不用阴影 */
+
+#moduleNode { padding: 12px 18px 18px; height: 100%; overflow: auto; }
+
+/* 全屏时占满整个屏幕，隐藏侧边栏和顶部栏 */
+#moduleNode:fullscreen {
+  padding: 0;
+  background: var(--bg, #f5f5f5);
+}
+#moduleNode:fullscreen .nc-shell {
+  height: 100vh;
+  grid-template-columns: 0 minmax(0, 1fr);
+  gap: 0;
+}
+#moduleNode:fullscreen .nc-side { display: none; }
+#moduleNode:fullscreen .nc-main { border-radius: 0; border: 0; }
+
+.nc-shell {
+  display: grid;
+  grid-template-columns: 278px minmax(0, 1fr);
+  gap: 12px;
+  height: calc(100vh - var(--topbar-h, 48px) - 34px);
+  min-height: 420px;
+}
+
+/* ------------------------------ 左侧：素材库 ------------------------------ */
+
+.nc-side {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--surface-1);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  overflow: hidden;
+}
+
+.nc-side-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 9px 10px;
+  border-bottom: 1px solid var(--line-soft);
+}
+.nc-side-head h2 { margin: 0; font-size: 13.5px; font-weight: 650; }
+
+.nc-chips { display: flex; gap: 4px; padding: 7px 10px 0; flex-wrap: wrap; }
+.nc-chip {
+  border: 1px solid var(--line);
+  background: var(--surface-3);
+  color: var(--text-dim);
+  border-radius: var(--r-xs);
+  padding: 3px 9px;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.nc-chip:hover { color: var(--text); background: var(--hover); }
+.nc-chip.active { background: var(--brand-soft); border-color: var(--brand); color: var(--brand); font-weight: 650; }
+
+.nc-asset-list {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 10px;
+}
+
+.nc-asset {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  gap: 8px;
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  cursor: grab;
+}
+.nc-asset:hover { border-color: var(--line-strong); background: var(--hover); }
+.nc-asset:active { cursor: grabbing; }
+
+.nc-asset-thumb {
+  position: relative;
+  width: 64px;
+  height: 48px;
+  border-radius: var(--r-xs);
+  overflow: hidden;
+  background: var(--inset);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.nc-asset-thumb img,
+.nc-asset-thumb video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.nc-asset-badge {
+  position: absolute;
+  right: 2px;
+  bottom: 2px;
+  padding: 0 4px;
+  font-size: 10px;
+  line-height: 15px;
+  color: #fff;
+  background: rgba(17, 24, 39, .72);
+  border-radius: 3px;
+}
+.nc-asset-badge.audio { position: static; background: var(--brand); color: var(--brand-ink); }
+
+.nc-asset-meta { min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: 2px; }
+.nc-asset-name {
+  font-size: 12.5px;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.nc-asset-size { font-size: 11.5px; color: var(--text-faint); }
+
+.nc-asset-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.nc-asset-btn {
+  border: 1px solid var(--line);
+  background: var(--surface-3);
+  color: var(--text-dim);
+  border-radius: var(--r-xs);
+  padding: 1px 7px;
+  font: inherit;
+  font-size: 11.5px;
+  cursor: pointer;
+}
+.nc-asset-btn:hover { color: var(--text); background: var(--hover); }
+.nc-asset-btn.danger { color: var(--err); border-color: #f2c9c6; }
+
+.nc-asset-empty { padding: 24px 10px; color: var(--text-faint); font-size: 12.5px; text-align: center; line-height: 1.7; }
+.nc-side-foot {
+  padding: 7px 10px;
+  border-top: 1px solid var(--line-soft);
+  font-size: 11.5px;
+  color: var(--text-faint);
+}
+
+/* ------------------------------ 右侧：画布 ------------------------------ */
+
+.nc-main { display: flex; flex-direction: column; min-width: 0; min-height: 0; gap: 8px; }
+
+.nc-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+  padding: 6px 8px;
+  background: var(--surface-1);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+}
+.nc-sep { width: 1px; height: 18px; background: var(--line); margin: 0 3px; }
+.nc-canvas-select {
+  height: 26px;
+  min-width: 150px;
+  max-width: 220px;
+  padding: 0 6px;
+  border: 1px solid var(--line-input);
+  border-radius: var(--r-xs);
+  background: var(--surface-1);
+  color: var(--text);
+  font: inherit;
+  font-size: 12.5px;
+}
+.nc-save { margin-left: auto; font-size: 11.5px; color: var(--text-faint); padding-right: 2px; }
+.nc-save.err { color: var(--err); }
+
+.nc-viewport {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  /* 画布底 = 皮肤纸色（面板恒白，靠 1px 描边和白卡分层） */
+  background: var(--canvas-bg);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  cursor: grab;
+  /* 拖动时不要选中文字 */
+  user-select: none;
+}
+.nc-viewport.panning { cursor: grabbing; }
+
+.nc-world {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  transform-origin: 0 0;
+}
+
+.nc-edges {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+/* 连线：1.5px 灰线，默认 / hover / 选中三态各一档（对齐 MiniMax 的极简连线）。
+   vector-effect 让线宽按屏幕像素算，画布放大到 4 倍也不会变成粗带子。 */
+.nc-edge {
+  fill: none;
+  stroke: #c4c4c4;
+  stroke-width: 1.5;
+  pointer-events: none;
+  transition: stroke .12s ease;
+}
+.nc-edge.selected { stroke: #525252; stroke-width: 2; }
+.nc-edge.temp { stroke: var(--brand); stroke-dasharray: 6 4; }
+/* 首帧 / 尾帧：一段视频吃两张图，两条线用颜色区分（首帧实、尾帧虚） */
+.nc-edge.edge-start { stroke: #3f9a94; }
+.nc-edge.edge-end { stroke: #d0658a; stroke-dasharray: 7 4; }
+.nc-edge-label {
+  pointer-events: none;
+  text-anchor: middle;
+  font-size: 11px;
+  font-weight: 600;
+  paint-order: stroke;
+  stroke: var(--surface, #fff);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+.nc-edge-label.edge-start { fill: #2f8079; }
+.nc-edge-label.edge-end { fill: #b8506f; }
+/* 生成中的连线：流光紫虚线在跑（MiniMax 的 #8B72FF → #C996FF 这一对） */
+.nc-edge.running {
+  stroke: #8b72ff;
+  stroke-width: 1.75;
+  stroke-dasharray: 5 5;
+  animation: nc-edge-flow 1s linear infinite;
+}
+@keyframes nc-edge-flow { to { stroke-dashoffset: -20; } }
+/* 流光光带：同一条路径垫在下面，粗、虚化、呼吸。不参与命中判定。 */
+.nc-edge-glow {
+  fill: none;
+  stroke: #c996ff;
+  stroke-width: 6;
+  stroke-linecap: round;
+  pointer-events: none;
+  filter: blur(3px);
+  opacity: .55;
+  animation: nc-edge-breath 1.8s ease-in-out infinite;
+}
+@keyframes nc-edge-breath {
+  0%, 100% { opacity: .35; }
+  50%      { opacity: .8; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nc-edge.running { animation: none; }
+  .nc-edge-glow { animation: none; opacity: .5; }
+}
+.nc-edge-hit {
+  fill: none;
+  stroke: transparent;
+  stroke-width: 18;
+  pointer-events: stroke;
+  cursor: pointer;
+}
+/* 鼠标停在连线的热区上时，让被它盖住的那条可见线变色（可见线在前、热区在后）。
+   用户显式选过颜色的连线不参与 hover 变色 —— hover 灰会盖住用户挑的颜色。 */
+.nc-edge:not([data-color]):has(+ .nc-edge-hit:hover) { stroke: #919191; }
+
+/* 节点层铺满整个画布：必须让指针穿透，否则它会盖住下面 SVG 里连线的点击热区，
+   结果真实鼠标永远点不中连线（选中连线、剪断连线都失效）。只让节点本身重新接管指针。 */
+.nc-nodes { position: absolute; inset: 0; pointer-events: none; }
+
+.nc-node {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface-1);
+  /* 卡片描边刻意压到最浅（MiniMax 用 #e3e3e3）：结构靠位置和间距表达，
+     不靠边框；鼠标进到卡片上才加深，给一点"可交互"的反馈。 */
+  border: 1px solid var(--line);
+  /* 卡片统一 12px 圆角（对齐 MiniMax 的 --radius） */
+  border-radius: 12px;
+  overflow: visible;
+  pointer-events: auto;
+  cursor: grab;
+  transition: border-color .12s ease;
+}
+.nc-node:hover { border-color: var(--line-strong); }
+/* 选中态：内描边不占位、不用外阴影；宽度按缩放反补偿，
+   放大到 4 倍或缩到 0.1 倍，屏幕上恒为 1.5px。 */
+.nc-node.selected {
+  border-color: var(--brand);
+  outline: calc(1.5px / var(--nc-zoom, 1)) solid var(--brand);
+  outline-offset: 0;
+}
+
+/* 卡片头：不画灰条，只留一行极小的类型标签（MiniMax 的卡宽只有 350，
+   标题必须让位给内容，类型信息压到 10px 靠字号区隔层级，而不是靠底色块）。
+   悬停/选中时才浮出右上角的复制与删除。 */
+/* 卡片头：不再占布局，浮在缩略图顶部，只在悬停/选中时露出复制与删除
+   （MiniMax 的卡面是干净的缩略图，操作按钮靠 hover 浮出） */
+.nc-node-head {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 24px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  padding: 0 5px;
+  background: transparent;
+  border-radius: 12px 12px 0 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .12s ease;
+}
+.nc-node:hover .nc-node-head,
+.nc-node.selected .nc-node-head { opacity: 1; }
+.nc-node-head .nc-node-actions { pointer-events: auto; }
+.nc-node-kind {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: .02em;
+  color: var(--text-faint);
+}
+.nc-node.selected .nc-node-kind { color: var(--text-dim); }
+
+/* 类型标签：卡片外上方（MiniMax 的「▶ 视频」），不占卡片高度 */
+.nc-node-tag {
+  position: absolute;
+  top: -17px;
+  left: 2px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  max-width: 100%;
+  font-size: 10px;
+  line-height: 1;
+  color: var(--text-faint);
+  pointer-events: none;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.nc-node-tag svg { flex: 0 0 auto; }
+.nc-node:hover .nc-node-tag { color: var(--text-dim); }
+.nc-node.selected .nc-node-tag { color: var(--brand); }
+
+/* 右侧 ⊕：从这个节点新建并连接（和 MiniMax 的 + 同位置）。
+   常显 —— 藏起来用户根本不知道有这个入口；默认压一点对比，悬停再提亮。 */
+.nc-node-add {
+  position: absolute;
+  right: -32px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid var(--line-strong);
+  background: var(--surface-1);
+  color: var(--text-faint);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 3;
+  transition: color .12s ease, border-color .12s ease, background .12s ease;
+}
+.nc-node:hover .nc-node-add,
+.nc-node.selected .nc-node-add { color: var(--text-dim); }
+.nc-node-add:hover { border-color: var(--brand); color: var(--brand); background: var(--brand-soft); }
+/* 正从 ⊕ 拉线：按钮保持高亮，让人知道线是从这儿出去的 */
+.nc-node-add.drag { border-color: var(--brand); color: var(--brand); background: var(--brand-soft); }
+.nc-node-actions {
+  display: flex;
+  gap: 1px;
+  opacity: 0;
+  transition: opacity .12s ease;
+}
+.nc-node:hover .nc-node-actions,
+.nc-node.selected .nc-node-actions,
+.nc-node:focus-within .nc-node-actions { opacity: 1; }
+.nc-node-actions button {
+  border: 0;
+  background: transparent;
+  color: var(--text-faint);
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+  line-height: 18px;
+  width: 18px;
+  border-radius: var(--r-xs);
+}
+.nc-node-actions button:hover { background: var(--hover); color: var(--text); }
+
+.nc-node-body {
+  flex: 1;
+  min-height: 0;
+  /* 缩略图铺满整张卡（MiniMax 式），表单在底部编辑面板里 */
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 0 0 12px 12px;
+}
+
+/* --------------------------- 卡片缩略图态 --------------------------- */
+
+.nc-thumb {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  background: var(--inset);
+  overflow: hidden;
+}
+.nc-thumb img,
+.nc-thumb video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+/* 文本卡：预览前几行，字小、灰、不抢戏 */
+.nc-thumb-text {
+  padding: 6px 9px;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--text-dim);
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 6;
+  -webkit-box-orient: vertical;
+  word-break: break-all;
+  align-self: stretch;
+}
+/* 文本卡整段显示：不截行数，卡拉多大就铺多大，装不下卡内滚动（滚轮已被 viewport 让给它）。
+   缩略图态（生成节点里的提示词摘要）仍然走上面那个 6 行截断的 .nc-thumb-text。 */
+.nc-thumb-text-full {
+  display: block;
+  -webkit-line-clamp: unset;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  align-self: stretch;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 11.5px;
+  line-height: 1.65;
+  cursor: text;
+}
+.nc-thumb-placeholder {
+  padding: 8px;
+  font-size: 11px;
+  color: var(--text-faint);
+  text-align: center;
+  line-height: 1.5;
+}
+.nc-thumb-icon { font-size: 22px; line-height: 1; opacity: .5; }
+.nc-thumb-sub {
+  font-size: 11px;
+  color: var(--text-faint);
+  max-width: 90%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.nc-thumb-status {
+  font-size: 10.5px;
+  color: var(--brand);
+  max-width: 92%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.nc-thumb-status.err { color: var(--err); }
+.nc-thumb-status.dim { color: var(--text-faint); }
+/* 生成中/失败角标：有结果图时浮在图上 */
+.nc-thumb-status.float {
+  position: absolute;
+  left: 6px;
+  top: 6px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .92);
+  border: 1px solid var(--line);
+  color: var(--brand);
+}
+.nc-thumb-status.float.err { color: var(--err); }
+/* 视频缩略图上的播放标 */
+.nc-thumb-badge {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: #fff;
+  background: rgba(17, 24, 39, .55);
+  pointer-events: none;
+}
+/* 文件名角标：左下，压图底部 */
+.nc-thumb-name {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 8px 8px 4px;
+  font-size: 10.5px;
+  color: #fff;
+  background: linear-gradient(transparent, rgba(17, 24, 39, .62));
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* --------------------------- 底部编辑面板 --------------------------- */
+
+/* display:flex 会把 [hidden] 的 display:none 顶掉（同优先级后定义者胜），
+   必须显式补一条，否则面板永远挂着一个空壳 */
+.nc-panel[hidden] { display: none !important; }
+
+.nc-panel {
+  position: absolute;
+  left: 50%;
+  bottom: 60px; /* 让开底部胶囊工具条（vtools） */
+  transform: translateX(-50%);
+  width: min(700px, calc(100% - 48px));
+  max-height: min(58%, 540px);
+  display: flex;
+  flex-direction: column;
+  background: var(--surface-1);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 0 10px 32px rgba(17, 24, 39, .16);
+  z-index: 10;
+  animation: nc-panel-in .16s ease;
+}
+@keyframes nc-panel-in {
+  from { transform: translateX(-50%) translateY(10px); opacity: 0; }
+  to { transform: translateX(-50%) translateY(0); opacity: 1; }
+}
+.nc-panel-head {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px 7px 13px;
+  border-bottom: 1px solid var(--line-soft);
+}
+.nc-panel-title {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.nc-panel-hint { margin-left: auto; font-size: 11px; color: var(--text-faint); }
+.nc-panel-actions { display: flex; gap: 2px; }
+.nc-panel-actions button {
+  border: 0;
+  background: transparent;
+  color: var(--text-faint);
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  line-height: 22px;
+  width: 24px;
+  border-radius: var(--r-xs);
+}
+.nc-panel-actions button:hover { background: var(--hover); color: var(--text); }
+.nc-panel-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 10px 13px 12px;
+}
+/* 面板里的表单比卡片里宽松一点：提示词是主输入区，给足行高 */
+.nc-panel-body .nc-gen { gap: 8px; }
+.nc-panel-body .nc-gen-row textarea { min-height: 88px; }
+.nc-panel-body .nc-text { min-height: 160px; }
+.nc-panel-body .nc-gen-label { flex-basis: 48px; font-size: 12px; }
+.nc-panel-body .nc-media { min-height: 140px; }
+/* .nc-media 的 max-height:100% 在滚动容器里无效，图片会按自然高度撑爆面板，显式限高 */
+.nc-panel-body .nc-media img { max-height: 260px; width: auto; max-width: 100%; margin: 0 auto; }
+.nc-panel-body .nc-media video { max-height: 260px; }
+.nc-panel-body .nc-gen-result img { max-height: 240px; }
+.nc-panel-body .nc-gen-result video { max-height: 220px; }
+
+/* ------------------- 生成节点编辑区（MiniMax 式 composer） ------------------- */
+/* 结构：参考图条 / 大输入框 / 底栏胶囊（模型·参数·数量…状态·生成） */
+
+.nc-composer { display: flex; flex-direction: column; gap: 8px; }
+
+.nc-composer-input {
+  width: 100%;
+  min-height: 96px;
+  max-height: 240px;
+  resize: none;
+  padding: 8px 10px;
+  border: 1px solid var(--line-soft);
+  border-radius: 8px;
+  background: var(--surface-3);
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.55;
+  outline: none;
+  transition: border-color .12s ease, background .12s ease;
+}
+.nc-composer-input::placeholder { color: var(--text-faint); }
+.nc-composer-input:focus { border-color: var(--brand); background: var(--surface-1); }
+
+.nc-composer-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  min-height: 30px;
+}
+
+/* 行内提示条：豆包客户端没开调试端口时出现在生成按钮上方。
+   注意 display:flex 会盖掉 [hidden] 的 display:none，必须单独补一条。 */
+.nc-hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-2);
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--text-dim);
+}
+.nc-hint[hidden] { display: none !important; }
+.nc-hint-text { flex: 1 1 auto; min-width: 0; }
+.nc-hint-act {
+  flex: 0 0 auto;
+  height: 24px;
+  padding: 0 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--surface-1);
+  color: var(--brand);
+  font: inherit;
+  font-size: 11.5px;
+  cursor: pointer;
+  transition: background .12s ease, border-color .12s ease;
+}
+.nc-hint-act:hover { background: var(--brand-soft); border-color: var(--brand); }
+.nc-hint-act[hidden] { display: none !important; }
+.nc-hint-act:disabled { opacity: .6; cursor: default; }
+
+/* 胶囊：模型 / 参数 / 数量 */
+.nc-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 26px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-1);
+  color: var(--text-dim);
+  font: inherit;
+  font-size: 11.5px;
+  cursor: pointer;
+  max-width: 260px;
+  transition: border-color .12s ease, color .12s ease, background .12s ease;
+}
+.nc-chip:hover { border-color: var(--brand); color: var(--text); background: var(--hover); }
+.nc-chip-dot { display: inline-flex; color: var(--brand); }
+.nc-chip-dot svg { display: block; }
+.nc-chip-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.nc-chip-model .nc-chip-text { color: var(--text); font-weight: 500; }
+
+/* 状态文案：底栏里占剩余空间，失败红、成功绿 */
+.nc-composer-bar .nc-gen-status {
+  margin-left: auto;
+  min-width: 0;
+  max-width: 44%;
+  font-size: 11px;
+  text-align: right;
+  color: var(--text-faint);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 生成按钮：圆形箭头，跟 MiniMax 的发送键同款 */
+.nc-send {
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 0;
+  background: var(--brand);
+  color: var(--brand-ink);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: filter .12s ease, opacity .12s ease;
+}
+.nc-send:hover { filter: brightness(1.06); }
+.nc-send:disabled { opacity: .45; cursor: default; }
+
+/* ------------------------------ 浮层（选择器） ------------------------------ */
+
+.nc-picker {
+  position: fixed;
+  z-index: 60;
+  min-width: 240px;
+  max-width: 320px;
+  max-height: min(420px, 70vh);
+  overflow-y: auto;
+  padding: 6px;
+  background: var(--surface-1);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 0 12px 34px rgba(17, 24, 39, .18);
+}
+.nc-picker-title {
+  padding: 4px 8px 6px;
+  font-size: 10.5px;
+  color: var(--text-faint);
+  letter-spacing: .02em;
+}
+.nc-picker-empty { padding: 8px; font-size: 11.5px; color: var(--text-faint); line-height: 1.6; }
+
+.nc-picker-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 7px 8px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.nc-picker-item:hover { background: var(--hover); }
+.nc-picker-item.on { background: var(--brand-soft); }
+.nc-picker-icon {
+  flex: 0 0 26px;
+  height: 26px;
+  border-radius: 7px;
+  background: var(--surface-3);
+  color: var(--text-dim);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.nc-picker-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.nc-picker-name {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12.5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.nc-picker-sub { font-size: 10.5px; color: var(--text-faint); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nc-picker-check { flex: 0 0 auto; color: var(--brand); font-size: 12px; }
+.nc-badge {
+  flex: 0 0 auto;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--brand-soft);
+  color: var(--brand);
+  font-size: 9.5px;
+  font-style: normal;
+  line-height: 15px;
+}
+.nc-picker-input {
+  width: 100%;
+  height: 30px;
+  padding: 0 8px;
+  margin-top: 2px;
+  border: 1px solid var(--line-input);
+  border-radius: 7px;
+  background: var(--surface-1);
+  color: var(--text);
+  font: inherit;
+  font-size: 12px;
+  outline: none;
+}
+.nc-picker-input:focus { border-color: var(--brand); }
+
+/* 比例网格：每格一个正比小方块 + 比例文字 */
+.nc-ratio-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 5px;
+  padding: 2px 2px 4px;
+}
+.nc-ratio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 7px 2px 6px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-1);
+  color: var(--text-faint);
+  font: inherit;
+  font-size: 10px;
+  cursor: pointer;
+}
+.nc-ratio:hover { border-color: var(--brand); color: var(--text); }
+.nc-ratio.on { border-color: var(--brand); color: var(--brand); background: var(--brand-soft); }
+.nc-ratio-box { display: block; border: 1.5px solid currentColor; border-radius: 2px; }
+
+/* 分段控件（清晰度） */
+.nc-seg {
+  display: flex;
+  gap: 3px;
+  padding: 3px;
+  border-radius: 9px;
+  background: var(--surface-3);
+}
+.nc-seg-item {
+  flex: 1;
+  height: 27px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text-dim);
+  font: inherit;
+  font-size: 11.5px;
+  cursor: pointer;
+}
+.nc-seg-item:hover { color: var(--text); }
+.nc-seg-item.on { background: var(--surface-1); color: var(--text); box-shadow: 0 1px 3px rgba(17, 24, 39, .1); }
+
+/* 时长：− 值 + 滑块 */
+.nc-dur { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 2px 4px; }
+.nc-dur-step {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--surface-1);
+  color: var(--text-dim);
+  font: inherit;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+}
+.nc-dur-step:hover { border-color: var(--brand); color: var(--brand); }
+/* 已经到档位尽头：置灰，但点上去不要有「能点」的反馈 */
+.nc-dur-step:disabled { opacity: .35; cursor: default; border-color: var(--line); color: var(--text-dim); }
+.nc-dur-val { font-size: 12.5px; color: var(--text); font-variant-numeric: tabular-nums; }
+.nc-dur-range { width: 100%; accent-color: var(--brand); }
+
+.nc-text {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  resize: none;
+  border: 1px solid var(--line);
+  border-radius: var(--r-xs);
+  background: var(--surface-1);
+  color: var(--text);
+  font: inherit;
+  padding: 6px 7px;
+  outline: none;
+}
+.nc-text:focus { border-color: var(--brand); }
+
+.nc-media {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--inset);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-xs);
+  overflow: hidden;
+}
+.nc-media img { max-width: 100%; max-height: 100%; object-fit: contain; display: block; }
+.nc-media video { width: 100%; max-height: 100%; display: block; background: var(--media-bg); }
+.nc-media audio { width: 100%; }
+.nc-media-empty { color: var(--text-faint); font-size: 12px; text-align: center; padding: 10px; line-height: 1.6; }
+
+.nc-media-bar { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+.nc-media-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 11.5px;
+  color: var(--text-faint);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nc-port {
+  position: absolute;
+  top: 13px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid var(--line-strong);
+  background: var(--surface-1);
+  cursor: crosshair;
+  z-index: 2;
+  /* 常驻但很淡（满屏小圈会搅乱连线结构），鼠标进节点/选中时才实心浮出 */
+  opacity: .55;
+  transition: opacity .12s ease, border-color .12s ease, background .12s ease;
+}
+.nc-node:hover .nc-port,
+.nc-node.selected .nc-port,
+.nc-node.connectable .nc-port { opacity: 1; }
+/* 圆点本身只有 14px，再套一圈 34px 的透明命中区，鼠标不用对得那么准 */
+.nc-port::after {
+  content: '';
+  position: absolute;
+  inset: -10px;
+  border-radius: 50%;
+}
+.nc-port:hover { border-color: var(--brand); background: var(--brand-soft); }
+/* 连线拖拽中：被磁吸住的端口与目标节点 */
+.nc-port.magnet {
+  border-color: var(--brand);
+  background: var(--brand);
+  box-shadow: 0 0 0 4px var(--brand-soft);
+  opacity: 1;
+}
+.nc-node.link-target {
+  border-color: var(--brand);
+  outline: calc(1.5px / var(--nc-zoom, 1)) dashed var(--brand);
+  outline-offset: 3px;
+}
+.nc-port-in { left: -8px; }
+.nc-port-out { right: -8px; }
+
+.nc-resize {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 14px;
+  height: 14px;
+  cursor: nwse-resize;
+  border-right: 2px solid var(--line-strong);
+  border-bottom: 2px solid var(--line-strong);
+  border-radius: 0 0 7px 0;
+  opacity: .7;
+}
+.nc-resize:hover { border-color: var(--brand); opacity: 1; }
+
+/* 生图 / 视频节点内部表单 */
+.nc-gen { display: flex; flex-direction: column; gap: 5px; min-height: 0; flex: 1; }
+.nc-gen-row { display: flex; align-items: center; gap: 5px; }
+.nc-gen-label { flex: 0 0 40px; font-size: 11.5px; color: var(--text-faint); }
+.nc-gen-row select,
+.nc-gen-row textarea,
+.nc-gen-params input,
+.nc-gen-params select {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--line-input);
+  border-radius: var(--r-xs);
+  background: var(--surface-1);
+  color: var(--text);
+  font: inherit;
+  font-size: 12px;
+  padding: 3px 5px;
+  outline: none;
+}
+.nc-gen-row textarea { min-height: 46px; resize: none; line-height: 1.45; }
+.nc-gen-row select:focus,
+.nc-gen-row textarea:focus,
+.nc-gen-params input:focus,
+.nc-gen-params select:focus { border-color: var(--brand); }
+.nc-gen-params { display: flex; gap: 4px; }
+.nc-gen-params input { flex: 1; }
+.nc-gen-params select { flex: 0 1 90px; }
+.nc-gen-actions { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.nc-gen-status { font-size: 11.5px; color: var(--text-faint); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nc-gen-status.ok { color: var(--ok); }
+.nc-gen-status.err { color: var(--err); }
+
+.nc-gen-result {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow: hidden;
+}
+/* 结果图不能吃 flex:1：卡片是按内容量高度的，弹性宽度+0 基准会把图压成一条线 */
+.nc-gen-result img { width: 100%; height: auto; max-height: 340px; object-fit: contain; background: var(--inset); border-radius: var(--r-xs); display: block; }
+.nc-gen-result video { width: 100%; max-height: 160px; background: var(--media-bg); border-radius: var(--r-xs); }
+.nc-gen-result-bar { display: flex; gap: 4px; }
+
+.nc-empty {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  color: var(--text-faint);
+  pointer-events: none;
+}
+.nc-empty p { margin: 0 0 4px; font-size: 13px; }
+.nc-empty .hint { font-size: 12px; }
+
+.nc-zoom {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  padding: 1px 7px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-xs);
+  background: var(--surface-1);
+  color: var(--text-faint);
+  font-size: 11px;
+  pointer-events: none;
+}
+
+/* ----------------------------- 画布体验增强 ----------------------------- */
+
+/* 画布底纹：三种图案（dots / grid / none），点色取前景的 12%（MiniMax 的
+   --canvas-bg-dot），间距 dots 10px、grid 12px —— 都是「余光才看得到」的强度。 */
+.nc-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(circle, var(--canvas-dot) 1px, transparent 1px);
+  background-size: 10px 10px;
+}
+#moduleNode[data-pattern="grid"] .nc-grid {
+  background-image:
+    linear-gradient(var(--canvas-dot) 1px, transparent 1px),
+    linear-gradient(90deg, var(--canvas-dot) 1px, transparent 1px);
+  background-size: 12px 12px;
+}
+#moduleNode[data-pattern="none"] .nc-grid { background-image: none; }
+
+/* 流光底纹：不加任何图案，只在底色上缓慢漂两层柔光和一道斜向扫过的亮带。
+   强度压得很低（0.16 上下），因为画布上真正要读的是节点和连线，底色只能做氛围。
+   两层用不同周期（26s / 19s），错开之后不会周期性「一起亮一下」。
+   显隐用 display 而不是 opacity 过渡：后台窗口的合成会被节流，靠 opacity:0 掩盖
+   有时会残留一帧流光，display:none 没有这个问题；淡入交给入场动画。 */
+.nc-flow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  display: none;
+}
+#moduleNode[data-pattern="flow"] .nc-flow {
+  display: block;
+  animation: nc-flow-in .3s ease;
+}
+@keyframes nc-flow-in { from { opacity: 0; } to { opacity: 1; } }
+.nc-flow::before,
+.nc-flow::after {
+  content: '';
+  position: absolute;
+  inset: -25%;
+  display: block;
+}
+/* 漂移的柔光团：两个偏心径向渐变，颜色取流光紫（#8B72FF / #C996FF） */
+.nc-flow::before {
+  background-image:
+    radial-gradient(closest-side, rgba(139, 114, 255, .16), transparent 70%),
+    radial-gradient(closest-side, rgba(201, 150, 255, .14), transparent 70%),
+    radial-gradient(closest-side, rgba(93, 156, 236, .10), transparent 70%);
+  background-size: 46% 62%, 40% 54%, 50% 44%;
+  background-position: 12% 22%, 82% 70%, 55% 42%;
+  background-repeat: no-repeat;
+  animation: nc-flow-drift 26s ease-in-out infinite alternate;
+}
+/* 斜向扫过的亮带：一条很宽的渐变带子横向平移，经过时像一道流光 */
+.nc-flow::after {
+  background-image: linear-gradient(
+    108deg,
+    transparent 38%,
+    rgba(255, 255, 255, .55) 47%,
+    rgba(201, 150, 255, .34) 50%,
+    rgba(255, 255, 255, .55) 53%,
+    transparent 62%
+  );
+  background-size: 260% 260%;
+  background-repeat: no-repeat;
+  animation: nc-flow-sweep 19s linear infinite;
+  mix-blend-mode: soft-light;
+}
+@keyframes nc-flow-drift {
+  from { transform: translate3d(-4%, 3%, 0) scale(1); }
+  to   { transform: translate3d(5%, -4%, 0) scale(1.12); }
+}
+@keyframes nc-flow-sweep {
+  from { background-position: -60% 0; }
+  to   { background-position: 160% 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nc-flow::before, .nc-flow::after { animation: none; }
+}
+
+/* 缩放控件：左下角，把右下 / 底部中间留给工具条与快捷键
+   —— 胶囊形，只靠 1px 描边分层 */
+.nc-zoombar {
+  position: absolute;
+  left: 10px;
+  bottom: 12px;
+  z-index: 6;
+  height: 36px;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-1);
+}
+.nc-zoombar button {
+  min-width: 28px;
+  height: 30px;
+  padding: 0 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: transparent;
+  color: var(--text-dim);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 8px;
+}
+.nc-zoombar button:hover { background: var(--hover); color: var(--text); }
+.nc-zoombar-sep { width: 1px; height: 18px; background: var(--line-soft); margin: 0 2px; }
+#ncZoomLevel { width: 46px; font-size: 12px; }
+#ncShortcutBtn { font-size: 12px; color: var(--text-faint); }
+
+/* 伪全屏模式：画布占满整个窗口 */
+#moduleNode.nc-fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  margin: 0;
+  border-radius: 0;
+  border: 0;
+}
+.app-shell.nc-fullscreen-shell {
+  display: block;
+}
+.app-shell.nc-fullscreen-shell .app-main {
+  margin: 0;
+  padding: 0;
+}
+.app-shell.nc-fullscreen-shell .app-content {
+  padding: 0;
+}
+
+/* 对齐辅助线：只在拖拽时显示 */
+.nc-guides { position: absolute; inset: 0; pointer-events: none; z-index: 5; }
+.nc-guide { position: absolute; background: var(--brand); }
+.nc-guide-v { top: 0; bottom: 0; width: 1px; }
+.nc-guide-h { left: 0; right: 0; height: 1px; }
+
+/* 框选矩形 */
+.nc-marquee {
+  position: absolute;
+  border: 1px solid var(--brand);
+  background: color-mix(in srgb, var(--brand) 12%, transparent);
+  pointer-events: none;
+  z-index: 4;
+}
+
+/* 右键菜单：扁平化，靠描边和表面色分层 */
+.nc-menu {
+  position: absolute;
+  z-index: 20;
+  min-width: 196px;
+  padding: 4px 0;
+  background: var(--surface-1);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-sm);
+}
+.nc-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 6px 12px;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 12.5px;
+  text-align: left;
+  cursor: pointer;
+}
+.nc-menu-label { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* 快捷键提示列：等宽小字、右对齐、弱化，不抢主标签 */
+.nc-menu-hint {
+  flex: 0 0 auto;
+  font-family: inherit;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--text-faint);
+  letter-spacing: 0;
+  background: none;
+  border: 0;
+  padding: 0;
+}
+.nc-menu-item:hover:not(:disabled) { background: var(--hover); }
+.nc-menu-item:hover:not(:disabled) .nc-menu-hint { color: var(--text-dim); }
+.nc-menu-item:disabled { color: var(--text-faint); cursor: default; }
+.nc-menu-item.danger { color: var(--err); }
+.nc-menu-sep { height: 1px; background: var(--line-soft); margin: 4px 0; }
+
+/* --------------------------- 视图工具条 / 小地图 / 查找 --------------------------- */
+
+/* 注意：下面这几个面板用了 display:flex，会盖掉 [hidden] 的 display:none，
+   必须显式补一条，否则浮层常驻在画布上（本项目其它模块也有同样写法） */
+.nc-minimap[hidden],
+.nc-find[hidden],
+.nc-cmd[hidden],
+.nc-help[hidden] { display: none; }
+
+/* 画布工具条：底部居中的浮动胶囊（对齐 MiniMax 的 --canvas-toolbar-* 几何）
+   ——高 46px、圆角 12px、图标 16px、无阴影只靠 1px 边框。 */
+.nc-vtools {
+  position: absolute;
+  left: 50%;
+  bottom: 12px;
+  transform: translateX(-50%);
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 46px;
+  padding: 2px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-1);
+  font-size: 13px;
+  letter-spacing: .025em;
+  animation: nc-toolbar-in .15s cubic-bezier(.16, 1, .3, 1);
+}
+@keyframes nc-toolbar-in {
+  from { opacity: 0; transform: translate(-50%, 6px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+.nc-vtools button {
+  min-width: 32px;
+  height: 40px;
+  padding: 0 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border: 0;
+  background: transparent;
+  color: var(--text-dim);
+  font: inherit;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  border-radius: 8px;
+}
+.nc-vtools button:hover { background: var(--hover); color: var(--text); }
+.nc-vtools button.on { background: var(--brand-soft); color: var(--brand); }
+/* 分隔线高 20px，跟 MiniMax 一致 */
+.nc-vtools button.nc-vtool-sep {
+  min-width: 1px;
+  width: 1px;
+  height: 20px;
+  padding: 0;
+  margin: 0 3px;
+  background: var(--line-soft);
+  border-radius: 0;
+  pointer-events: none;
+}
+
+/* 小地图：右上角（缩放控件已移到左下，这里独占右上） */
+.nc-minimap {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  z-index: 6;
+  width: 200px;
+  height: 130px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--surface-1) 92%, transparent);
+  cursor: crosshair;
+}
+.nc-minimap canvas { display: block; width: 100%; height: 100%; }
+
+/* 画布状态条：左上角「画布名 · 节点数 · 保存态」。
+   只在画布上飘着，不进工具条 —— 读信息的动作和操作的动作分开。 */
+.nc-status {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  z-index: 6;
+  height: 30px;
+  padding: 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--surface-1) 88%, transparent);
+  font-size: 11.5px;
+  color: var(--text-faint);
+  max-width: calc(100% - 240px);
+  pointer-events: none;
+}
+.nc-status-name {
+  font-weight: 500;
+  color: var(--text-dim);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 220px;
+}
+.nc-status-dot {
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background: var(--line-strong);
+  flex: 0 0 auto;
+}
+.nc-status-save.saving { color: var(--run); }
+.nc-status-save.saved { color: var(--ok); }
+.nc-status-save.err { color: var(--err); }
+
+/* 多选浮动工具条：选中 ≥2 个节点时浮在选区上方（对齐 MiniMax 的「N 节点 | 布局 | 对齐 | 打组 | 复制」）。
+   它不常驻，所以只画 1px 边框 + 一格白底，别抢注意力。 */
+.nc-selbar {
+  position: absolute;
+  z-index: 8;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 34px;
+  padding: 2px;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  background: var(--surface-1);
+  animation: nc-selbar-in .12s ease;
+}
+.nc-selbar[hidden] { display: none; }
+@keyframes nc-selbar-in {
+  from { opacity: 0; transform: translateY(3px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.nc-selbar-count {
+  padding: 0 8px;
+  font-size: 11.5px;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+.nc-selbar-sep { width: 1px; height: 16px; background: var(--line-soft); margin: 0 2px; }
+.nc-selbar button {
+  height: 28px;
+  padding: 0 9px;
+  border: 0;
+  background: transparent;
+  color: var(--text-dim);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  border-radius: 7px;
+  white-space: nowrap;
+}
+.nc-selbar button:hover { background: var(--hover); color: var(--text); }
+.nc-selbar button.on { background: var(--brand-soft); color: var(--brand); }
+.nc-selbar button.danger:hover { background: rgba(217, 45, 32, .08); color: var(--err); }
+
+/* 对齐子菜单 */
+.nc-selmenu {
+  position: absolute;
+  z-index: 9;
+  min-width: 118px;
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  background: var(--surface-1);
+}
+.nc-selmenu[hidden] { display: none; }
+.nc-selmenu button {
+  height: 28px;
+  padding: 0 8px;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 12.5px;
+  cursor: pointer;
+  border-radius: 6px;
+}
+.nc-selmenu button:hover { background: var(--hover); }
+.nc-selmenu-sep { height: 1px; margin: 4px 2px; background: var(--line-soft); }
+
+/* 媒体卡脚注：文件名 + 分辨率（MiniMax 的「图片 7 / 2720 × 1520」）。
+   分辨率是判断"这张图能不能用"的关键信息，跟文件名同一行、靠右。 */
+.nc-media-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  color: var(--text-faint);
+  letter-spacing: .01em;
+  line-height: 1.3;
+  min-width: 0;
+  flex: 1;
+}
+.nc-media-meta .nc-media-dim { flex: 0 0 auto; font-variant-numeric: tabular-nums; }
+.nc-media-meta .nc-media-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 10px;
+}
+
+/* 连线 5 色：默认灰，只有用户显式选过颜色才生效。
+   颜色都压到低饱和 —— 满屏彩色连线会让画布失去结构感。 */
+.nc-edge[data-color="teal"] { stroke: #3f9a94; }
+.nc-edge[data-color="violet"] { stroke: #8b72ff; }
+.nc-edge[data-color="gold"] { stroke: #c99a3a; }
+.nc-edge[data-color="rose"] { stroke: #d0658a; }
+.nc-edge[data-color="slate"] { stroke: #525252; }
+
+/* 画布内查找：顶部居中，避开右上小地图与左上留白 */
+.nc-find {
+  position: absolute;
+  left: 50%;
+  top: 10px;
+  transform: translateX(-50%);
+  z-index: 7;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  background: var(--surface-1);
+}
+.nc-find input {
+  width: 210px;
+  height: 24px;
+  padding: 0 6px;
+  border: 1px solid var(--line-input);
+  border-radius: var(--r-xs);
+  background: var(--surface-1);
+  color: var(--text);
+  font: inherit;
+  font-size: 12.5px;
+}
+.nc-find input:focus { outline: none; border-color: var(--brand); }
+.nc-find-count { min-width: 42px; text-align: center; font-size: 11.5px; color: var(--text-faint); }
+.nc-find button {
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-xs);
+  background: var(--surface-1);
+  color: var(--text-dim);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.nc-find button:hover { background: var(--hover); color: var(--text); }
+
+/* ------------------------------ 命令面板 / 快捷键 ------------------------------ */
+
+.nc-cmd {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 9vh;
+}
+.nc-cmd-box {
+  width: min(560px, 92%);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-md);
+  background: var(--surface-1);
+  overflow: hidden;
+}
+.nc-cmd-box input {
+  width: 100%;
+  height: 40px;
+  padding: 0 12px;
+  border: 0;
+  border-bottom: 1px solid var(--line-soft);
+  background: var(--surface-1);
+  color: var(--text);
+  font: inherit;
+  font-size: 13.5px;
+}
+.nc-cmd-box input:focus { outline: none; }
+.nc-cmd-list { max-height: 320px; overflow: auto; padding: 4px 0; }
+.nc-cmd-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  font-size: 12.5px;
+  color: var(--text);
+  cursor: pointer;
+}
+.nc-cmd-item .nc-cmd-icon { width: 16px; text-align: center; color: var(--text-faint); font-size: 12px; }
+.nc-cmd-item .nc-cmd-hint { margin-left: auto; font-size: 11px; color: var(--text-faint); }
+.nc-cmd-item.active { background: var(--brand-soft); color: var(--brand); }
+.nc-cmd-item.active .nc-cmd-icon,
+.nc-cmd-item.active .nc-cmd-hint { color: var(--brand); }
+.nc-cmd-empty { padding: 12px; font-size: 12.5px; color: var(--text-faint); text-align: center; }
+
+.nc-help {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.nc-help-box {
+  width: min(700px, 94%);
+  max-height: 80%;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-md);
+  background: var(--surface-1);
+  overflow: hidden;
+}
+.nc-help-box header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line-soft);
+}
+.nc-help-box header h3 { margin: 0; font-size: 13.5px; font-weight: 600; color: var(--text); }
+.nc-help-box header button {
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-xs);
+  background: var(--surface-1);
+  color: var(--text-dim);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.nc-help-box header button:hover { background: var(--hover); color: var(--text); }
+.nc-help-grid {
+  padding: 8px 14px 14px;
+  overflow: auto;
+  columns: 2;
+  column-gap: 26px;
+}
+.nc-help-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 4px 0;
+  break-inside: avoid;
+  font-size: 12.5px;
+  color: var(--text-dim);
+}
+.nc-help-row kbd {
+  flex: none;
+  padding: 1px 6px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-xs);
+  background: var(--surface-3);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 11px;
+}
+.nc-help-group {
+  padding: 8px 0 2px;
+  break-inside: avoid;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-faint);
+}
+
+/* --------------------------- 皮肤面板（底色 + 图案） --------------------------- */
+
+/* 和命令面板同一套浮层规矩：inset 铺满、靠 padding 把内容推到中间。
+   皮肤面板挂在底部工具条上方居中弹出——右上角已经被缩放条和小地图占了。 */
+.nc-skin {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 10px 10px 66px;
+}
+.nc-skin[hidden] { display: none; }
+.nc-skin-box {
+  width: 268px;
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  background: var(--surface-1);
+  overflow: hidden;
+}
+.nc-skin-box header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--line-soft);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text);
+}
+.nc-skin-box header button {
+  width: 22px;
+  height: 22px;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-xs);
+  background: var(--surface-1);
+  color: var(--text-dim);
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+.nc-skin-box header button:hover { background: var(--hover); color: var(--text); }
+
+.nc-skin-group { padding: 10px 12px; }
+.nc-skin-group + .nc-skin-group { border-top: 1px solid var(--line-soft); }
+.nc-skin-title {
+  margin-bottom: 7px;
+  font-size: 11px;
+  color: var(--text-faint);
+}
+/* 底色：3×3 的色块，选中态用描边 + 内侧对勾，不靠阴影 */
+.nc-skin-tones {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+.nc-skin-tone {
+  position: relative;
+  height: 42px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--tone);
+  color: var(--text-dim);
+  font: inherit;
+  font-size: 10.5px;
+  cursor: pointer;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 4px;
+}
+.nc-skin-tone:hover { border-color: var(--line-strong); }
+.nc-skin-tone.on {
+  border-color: var(--brand);
+  box-shadow: inset 0 0 0 1px var(--brand);
+  color: var(--brand);
+  font-weight: 600;
+}
+/* 图案：三个等宽按钮，选中的用 brand-soft 底 */
+.nc-skin-patterns { display: flex; gap: 6px; }
+.nc-skin-patterns button {
+  flex: 1;
+  height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text-dim);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.nc-skin-patterns button:hover { border-color: var(--line-strong); }
+.nc-skin-patterns button.on {
+  border-color: var(--brand);
+  background: var(--brand-soft);
+  color: var(--brand);
+  font-weight: 600;
+}
+
+#moduleNode.nc-panmode .nc-viewport { cursor: grab; }
+#moduleNode.nc-panmode .nc-viewport.panning { cursor: grabbing; }
+/* 按住空格临时平移：整块视口变抓手，节点上也不显示文本光标 */
+.nc-viewport.space-pan { cursor: grab !important; }
+.nc-viewport.space-pan.panning { cursor: grabbing !important; }
+.nc-viewport.space-pan .nc-node,
+.nc-viewport.space-pan .nc-node * { cursor: grab !important; }
+#moduleNode.nc-cutmode .nc-edge-hit { cursor: crosshair; }
+
+/* 查找 / 命令面板定位到的节点 */
+.nc-node.hit { outline: 2px solid var(--warn); outline-offset: 1px; }
+
+/* 节点内 @ 引用浮层 */
+.nc-node-mention {
+  position: fixed;
+  left: 0;
+  top: 0;
+  max-height: 200px;
+  overflow: auto;
+  background: var(--surface-1);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-sm);
+  padding: 4px 0;
+  z-index: 30;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+.nc-node-mention-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 5px 10px;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 12.5px;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+.nc-node-mention-item:hover { background: var(--hover); }
+.nc-node-mention-item img { width: 24px; height: 24px; border-radius: var(--r-xs); object-fit: cover; }
+.nc-node-mention-item span { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nc-node-mention-badge {
+  flex: none;
+  padding: 0 5px;
+  border-radius: var(--r-xs);
+  background: var(--brand-soft);
+  color: var(--brand);
+  font-size: 10.5px;
+  font-weight: 600;
+}
+
+/* 生图 / 视频节点里的引用缩略图行 */
+.nc-refs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding-left: 45px;
+}
+.nc-refs[hidden] { display: none; }
+.nc-ref-chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+  padding: 2px 5px 2px 2px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-full);
+  background: var(--surface-3);
+  color: var(--text-dim);
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+.nc-ref-chip:hover { border-color: var(--brand); color: var(--text); }
+.nc-ref-chip img {
+  width: 20px;
+  height: 20px;
+  border-radius: var(--r-full);
+  object-fit: cover;
+  background: var(--inset);
+}
+.nc-ref-chip span { flex: none; }
+.nc-ref-chip .nc-ref-x {
+  flex: none;
+  font-style: normal;
+  padding: 0 2px;
+  color: var(--text-faint);
+  border-radius: var(--r-xs);
+}
+
+/* 视频节点的首帧 / 尾帧状态条：一段视频吃两张图，面板里点名是哪两张 */
+.nc-frames {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 4px 0 2px 45px;
+}
+.nc-frame-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--text-dim);
+}
+.nc-frame-row.miss { color: var(--text-faint); }
+.nc-frame-row img {
+  width: 18px;
+  height: 18px;
+  border-radius: var(--r-xs);
+  object-fit: cover;
+  background: var(--inset);
+}
+.nc-frame-tag {
+  flex: none;
+  padding: 0 5px;
+  border-radius: var(--r-xs);
+  color: #fff;
+  font-weight: 600;
+  line-height: 15px;
+}
+.nc-frame-tag.edge-start { background: #2f8079; }
+.nc-frame-tag.edge-end { background: #b8506f; }
+.nc-frame-name {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.nc-frame-note {
+  padding-left: 2px;
+  color: var(--text-faint);
+  font-size: 10.5px;
+  line-height: 1.4;
+}
+.nc-ref-chip .nc-ref-x:hover { background: var(--err); color: var(--on-err); }
+
+/* 新建 / 重命名画布的小弹窗（Electron 里不能用 window.prompt） */
+.nc-prompt-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--overlay);
+}
+.nc-prompt {
+  width: 320px;
+  background: var(--surface-1);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  padding: 14px;
+}
+.nc-prompt h3 { margin: 0 0 10px; font-size: 14px; }
+.nc-prompt label { display: block; font-size: 12px; color: var(--text-dim); }
+.nc-prompt input {
+  width: 100%;
+  margin-top: 5px;
+  height: 30px;
+  padding: 0 8px;
+  border: 1px solid var(--line-input);
+  border-radius: var(--r-xs);
+  background: var(--surface-1);
+  color: var(--text);
+  font: inherit;
+  outline: none;
+}
+.nc-prompt input:focus { border-color: var(--brand); }
+.nc-prompt-actions { display: flex; justify-content: flex-end; gap: 6px; margin-top: 12px; }
+
+/* 重新生成：多行输入（这次想改什么），留空就原样重跑 */
+.nc-prompt.wide { width: 420px; }
+.nc-prompt textarea {
+  width: 100%;
+  margin-top: 5px;
+  min-height: 84px;
+  padding: 7px 8px;
+  border: 1px solid var(--line-input);
+  border-radius: var(--r-xs);
+  background: var(--surface-1);
+  color: var(--text);
+  font: inherit;
+  line-height: 1.5;
+  resize: vertical;
+  outline: none;
+}
+.nc-prompt textarea:focus { border-color: var(--brand); }
+.nc-prompt .nc-prompt-tip { margin: 8px 0 0; font-size: 11px; color: var(--text-dim); line-height: 1.5; }
+
+/* 底栏上「这次要改什么」的胶囊：一眼看出重跑会带上修改意见 */
+.nc-chip.nc-chip-revise { max-width: 150px; border-color: var(--brand); }
+.nc-chip.nc-chip-revise .nc-chip-text { color: var(--brand); }
+
+@media (max-width: 1100px) {
+  .nc-shell { grid-template-columns: 226px minmax(0, 1fr); }
+}
+
+/* ============================================================================
+   AI 编导 · 画布内聊天窗
+   ----------------------------------------------------------------------------
+   贴在画布右侧的一段常驻对话，不是弹窗遮罩 —— 一边看节点一边聊。
+   聊天窗开着时给 viewport 加 .nc-chat-open，底部编辑面板会在剩下的空间里居中，
+   不然两者会叠在一起（编辑面板宽 700 居中，正好压住右半边）。
+   ========================================================================== */
+.nc-chat {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  bottom: 70px;              /* 让开底部胶囊工具条 */
+  z-index: 11;               /* 压过编辑面板（10）：两个都开着时聊天窗在上面 */
+  width: 344px;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--line-strong);
+  border-radius: 14px;
+  background: var(--surface-1);
+  box-shadow: 0 14px 40px rgba(17, 24, 39, .16);
+  overflow: hidden;
+  /* 画布整体禁选是为了拖动时不选中文字；聊天窗里的字是要复制出去的，单独放开 */
+  user-select: text;
+  animation: nc-chat-in .18s cubic-bezier(.16, 1, .3, 1);
+}
+.nc-chat[hidden] { display: none !important; }
+@keyframes nc-chat-in {
+  from { transform: translateX(14px); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+
+/* 头：小徽标 + 标题 + 参数 / 收起 */
+.nc-chat-head {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 8px 10px 12px;
+  border-bottom: 1px solid var(--line);
+}
+.nc-chat-mark {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 7px;
+  background: var(--brand-soft);
+  color: var(--brand);
+}
+.nc-chat-titles {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.nc-chat-title { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.3; }
+.nc-chat-sub {
+  font-size: 11px;
+  line-height: 1.3;
+  color: var(--text-faint);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.nc-chat-icon {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text-faint);
+  cursor: pointer;
+}
+.nc-chat-icon:hover { background: var(--hover); color: var(--text); }
+.nc-chat-icon.on { background: var(--brand-soft); color: var(--brand); }
+/* 历史对话按钮带字：纯图标太容易被当成装饰，用户根本找不到入口 */
+.nc-chat-icon.nc-chat-icon-label {
+  width: auto;
+  gap: 4px;
+  padding: 0 7px;
+  font: inherit;
+  font-size: 11.5px;
+  line-height: 24px;
+  white-space: nowrap;
+}
+
+/* 参数：默认收起，点右上三个点才展开 */
+.nc-chat-params {
+  flex: none;
+  padding: 10px 12px 12px;
+  border-bottom: 1px solid var(--line);
+  background: var(--inset);
+}
+.nc-chat-params[hidden] { display: none !important; }
+.nc-chat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.nc-chat-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.nc-chat-field > span { font-size: 11px; color: var(--text-faint); }
+.nc-chat-select {
+  height: 28px;
+  padding: 0 6px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--surface-1);
+  color: var(--text);
+  font: inherit;
+  font-size: 12px;
+  outline: none;
+  cursor: pointer;
+  min-width: 0;
+}
+.nc-chat-select:focus { border-color: var(--brand); }
+.nc-chat-hint {
+  margin: 8px 0 0;
+  font-size: 11px;
+  line-height: 1.55;
+  color: var(--text-faint);
+}
+.nc-chat-hint[hidden] { display: none !important; }
+
+/* 「写剧本的模型」那一行：左边说明、右边一个能点的按钮（点开剧本模型弹窗） */
+.nc-chat-model-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 8px;
+}
+.nc-chat-model-line > .nc-chat-hint { margin: 0; }
+.nc-chat-model-line .btn.tiny {
+  max-width: 60%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* 多模态模型写剧本容易自己编故事：按钮换成黄框提醒一下，但不拦着不让用 */
+.nc-chat-model-line .btn.tiny.warn {
+  border-color: #e0b34a;
+  color: #8a6414;
+}
+html[data-theme="dark"] .nc-chat-model-line .btn.tiny.warn {
+  border-color: #6a5320;
+  color: #e2be6a;
+}
+
+/* 对话记录 */
+.nc-chat-log {
+  flex: 1;
+  min-height: 0;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.nc-chat-msg { display: flex; }
+.nc-chat-msg.user { justify-content: flex-end; }
+.nc-chat-bubble {
+  position: relative;
+  max-width: 86%;
+  padding: 8px 11px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 12.5px;
+  line-height: 1.62;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.nc-chat-msg.user .nc-chat-bubble {
+  background: var(--brand);
+  border-color: transparent;
+  color: var(--brand-ink);
+  border-bottom-right-radius: 4px;
+}
+.nc-chat-msg.assistant .nc-chat-bubble { border-bottom-left-radius: 4px; }
+.nc-chat-msg.error .nc-chat-bubble {
+  background: transparent;
+  border-color: var(--err);
+  color: var(--err);
+  border-bottom-left-radius: 4px;
+}
+
+/* 每条气泡右上角悬停出现的「复制」：整段剧本/分镜提示词一句话就能拿走 */
+.nc-chat-copy {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-1);
+  color: var(--text-faint);
+  box-shadow: 0 1px 4px rgba(17, 24, 39, .12);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity .12s ease, color .12s ease;
+}
+.nc-chat-bubble:hover .nc-chat-copy,
+.nc-chat-copy:focus-visible { opacity: 1; }
+.nc-chat-copy:hover { color: var(--brand); }
+.nc-chat-copy.ok { color: var(--ok); opacity: 1; }
+
+/* 等模型时的三个点 */
+.nc-chat-typing {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 11px;
+}
+.nc-chat-typing i {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--text-faint);
+  animation: nc-chat-blink 1s infinite ease-in-out;
+}
+.nc-chat-typing i:nth-child(2) { animation-delay: .15s; }
+.nc-chat-typing i:nth-child(3) { animation-delay: .3s; }
+@keyframes nc-chat-blink {
+  0%, 80%, 100% { opacity: .25; transform: translateY(0); }
+  40% { opacity: 1; transform: translateY(-2px); }
+}
+
+/* 铺完之后跟在气泡下面的动作按钮 */
+.nc-chat-act { display: flex; gap: 6px; margin-top: -3px; }
+.nc-chat-act button {
+  height: 26px;
+  padding: 0 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--surface-1);
+  color: var(--text);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.nc-chat-act button:hover { border-color: var(--brand); color: var(--brand); background: var(--brand-soft); }
+
+/* 空对话：引导 + 三个能直接点的例子 */
+.nc-chat-welcome {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 2px;
+}
+.nc-chat-welcome-tip {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.72;
+  color: var(--text-dim);
+}
+.nc-chat-examples {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.nc-chat-example {
+  padding: 8px 10px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 9px;
+  background: transparent;
+  color: var(--text-dim);
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: left;
+  cursor: pointer;
+}
+.nc-chat-example:hover {
+  border-style: solid;
+  border-color: var(--brand);
+  background: var(--brand-soft);
+  color: var(--brand);
+}
+
+/* 空对话时的「接着之前聊」：把历史摆到眼前，别让人以为记录没了 */
+.nc-chat-reuse {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+}
+.nc-chat-reuse-label { font-size: 11.5px; color: var(--text-faint); }
+.nc-chat-reuse .nc-chat-example {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 快捷条 */
+.nc-chat-quick {
+  flex: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0 12px 8px;
+}
+.nc-chat-quick button {
+  height: 26px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--text-dim);
+  font: inherit;
+  font-size: 11.5px;
+  cursor: pointer;
+}
+.nc-chat-quick button:hover { color: var(--text); border-color: var(--line-strong); }
+.nc-chat-quick button[hidden] { display: none !important; }
+.nc-chat-quick button:disabled { opacity: .5; cursor: default; }
+.nc-chat-quick button[data-quick="run"] {
+  border-color: transparent;
+  background: var(--brand);
+  color: var(--brand-ink);
+  font-weight: 600;
+}
+.nc-chat-quick button[data-quick="run"]:hover { filter: brightness(1.06); }
+
+/* 历史对话：和参数面板同一个位置（展开在聊天记录上方），点一段就接着聊 */
+.nc-chat-history {
+  flex: none;
+  max-height: 48%;
+  display: flex;
+  flex-direction: column;
+  padding: 8px 12px 10px;
+  border-bottom: 1px solid var(--line);
+  background: var(--inset);
+}
+.nc-chat-history[hidden] { display: none !important; }
+.nc-chat-history-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  padding-bottom: 6px;
+  font-size: 11px;
+  color: var(--text-faint);
+}
+.nc-chat-history-list {
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.nc-chat-history-empty {
+  padding: 8px 2px;
+  font-size: 11.5px;
+  line-height: 1.65;
+  color: var(--text-faint);
+}
+.nc-chat-history-row { display: flex; align-items: stretch; gap: 4px; }
+.nc-chat-history-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-2);
+  color: var(--text-dim);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.nc-chat-history-main:hover { border-color: var(--line-strong); color: var(--text); }
+.nc-chat-history-row.on .nc-chat-history-main {
+  border-color: var(--brand);
+  background: var(--brand-soft);
+  color: var(--text);
+}
+.nc-chat-history-title {
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.nc-chat-history-meta { font-size: 10.5px; color: var(--text-faint); }
+.nc-chat-history-del {
+  flex: none;
+  width: 24px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-faint);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.nc-chat-history-del:hover { color: var(--err); border-color: var(--line); }
+
+/* 从素材库挑参考图：盖住整个画布，缩略图按方格排，点一下选中 */
+.nc-libpick {
+  position: absolute;
+  inset: 0;
+  z-index: 24;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: var(--overlay);
+}
+.nc-libpick[hidden] { display: none !important; }
+.nc-libpick-box {
+  width: min(560px, 100%);
+  max-height: min(72vh, 540px);
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-md);
+  background: var(--surface-1);
+  overflow: hidden;
+}
+.nc-libpick-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+  font-size: 12.5px;
+  color: var(--text);
+}
+.nc-libpick-title { font-weight: 600; }
+.nc-libpick-hint { flex: 1; font-size: 11px; color: var(--text-faint); }
+.nc-libpick-grid {
+  flex: 1;
+  overflow: auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 8px;
+  padding: 12px;
+}
+.nc-libpick-empty {
+  grid-column: 1 / -1;
+  padding: 18px 4px;
+  font-size: 11.5px;
+  color: var(--text-faint);
+  text-align: center;
+}
+.nc-libpick-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 5px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-2);
+  color: var(--text-dim);
+  font: inherit;
+  cursor: pointer;
+}
+.nc-libpick-item img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 5px;
+  background: var(--media-bg);
+}
+.nc-libpick-item span {
+  font-size: 10.5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.nc-libpick-item:hover { border-color: var(--line-strong); color: var(--text); }
+.nc-libpick-item.on {
+  border-color: var(--brand);
+  box-shadow: inset 0 0 0 1px var(--brand);
+  color: var(--text);
+}
+.nc-libpick-item:disabled { opacity: .4; cursor: default; }
+.nc-libpick-foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 10px 12px;
+  border-top: 1px solid var(--line);
+}
+
+/* 输入区 */
+.nc-chat-compose {
+  flex: none;
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 10px 12px 12px;
+  border-top: 1px solid var(--line);
+}
+.nc-chat-compose textarea {
+  flex: 1;
+  min-width: 0;
+  height: 38px;
+  min-height: 38px;
+  max-height: 132px;
+  padding: 9px 11px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--inset);
+  color: var(--text);
+  font: inherit;
+  font-size: 12.5px;
+  line-height: 1.5;
+  resize: none;
+  outline: none;
+  overflow-y: auto;
+}
+.nc-chat-compose textarea::placeholder { color: var(--text-faint); }
+.nc-chat-compose textarea:focus { border-color: var(--brand); }
+.nc-chat-send {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 9px;
+  background: var(--brand);
+  color: var(--brand-ink);
+  cursor: pointer;
+}
+.nc-chat-send:hover { filter: brightness(1.06); }
+.nc-chat-send:disabled { opacity: .5; cursor: default; filter: none; }
+
+/* 参考图：输入框左边的「加图」按钮 —— 发人物照让 AI 照着写长相 */
+.nc-chat-pick {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--surface-2);
+  color: var(--text-dim);
+  cursor: pointer;
+}
+.nc-chat-pick:hover { border-color: var(--brand); color: var(--brand); background: var(--brand-soft); }
+
+/* 待发送的那几张缩略图，横排在输入框上面 */
+.nc-chat-photos {
+  flex: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0 12px 8px;
+}
+.nc-chat-photos[hidden] { display: none !important; }
+.nc-chat-photo {
+  position: relative;
+  width: 46px;
+  height: 46px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: var(--inset);
+}
+.nc-chat-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.nc-chat-photo-x {
+  position: absolute;
+  top: 1px;
+  right: 1px;
+  width: 15px;
+  height: 15px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, .58);
+  color: #fff;
+  font-size: 11px;
+  line-height: 15px;
+  text-align: center;
+  cursor: pointer;
+}
+.nc-chat-photo-x:hover { background: var(--err); }
+
+/* 气泡里带出去的图，比待发的那排小一号 */
+.nc-chat-bubble-photos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+.nc-chat-bubble-photos img {
+  width: 38px;
+  height: 38px;
+  object-fit: cover;
+  border-radius: 6px;
+  display: block;
+}
+
+/* 拖图进来时整窗描个边，不然不知道松手会不会被接住 */
+.nc-chat.dropping { border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-soft); }
+
+/* 聊天窗开着时，底部编辑面板在剩余空间里居中（窄屏不放，否则面板会被挤没） */
+@media (min-width: 861px) {
+  .nc-viewport.nc-chat-open .nc-panel {
+    left: calc(50% - 186px);
+    width: min(700px, calc(100% - 372px - 36px));
+  }
+}
+@media (max-width: 860px) {
+  .nc-chat { width: calc(100% - 28px); }
+}
+
+/* 顶部跑批条 */
+.nc-runbar {
+  position: absolute;
+  left: 50%;
+  top: 14px;
+  transform: translateX(-50%);
+  z-index: 8;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  padding: 0 6px 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-1);
+  box-shadow: 0 6px 20px rgba(17, 24, 39, .12);
+  font-size: 12px;
+  color: var(--text-dim);
+  white-space: nowrap;
+  animation: nc-toolbar-in .15s cubic-bezier(.16, 1, .3, 1);
+}
+.nc-runbar[hidden] { display: none !important; }
+.nc-runbar-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--brand);
+}
+/* 夜间：首尾帧两条线要更亮才分得清（灰底上的深青 / 深玫红看不出来） */
+html[data-theme="dark"] .nc-edge.edge-start { stroke: #4fb2ab; }
+html[data-theme="dark"] .nc-edge.edge-end { stroke: #d97b9c; }
+html[data-theme="dark"] .nc-edge-label.edge-start { fill: #6fd0c9; }
+html[data-theme="dark"] .nc-edge-label.edge-end { fill: #ec9ab5; }
+.nc-runbar-name { font-weight: 600; color: var(--text); max-width: 160px; overflow: hidden; text-overflow: ellipsis; }
+.nc-runbar-stat { color: var(--text-faint); font-variant-numeric: tabular-nums; }
+.nc-runbar-go {
+  height: 26px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--brand);
+  color: var(--brand-ink);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.nc-runbar-go:disabled { opacity: .5; cursor: default; }
+.nc-runbar-stop {
+  height: 26px;
+  padding: 0 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-dim);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.nc-runbar-stop[hidden] { display: none !important; }
+.nc-runbar-stop:hover { border-color: var(--err); color: var(--err); }
+.nc-runbar-x {
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-faint);
+  cursor: pointer;
+}
+.nc-runbar-x:hover { background: var(--hover); color: var(--text); }
+
+html[data-theme="dark"] .nc-director { background: rgba(0, 0, 0, .42); }
+html[data-theme="dark"] .nc-director-box { box-shadow: 0 18px 48px rgba(0, 0, 0, .6); }
+html[data-theme="dark"] .nc-runbar { box-shadow: 0 6px 20px rgba(0, 0, 0, .5); }
+
+/* ============================================================================
+   夜间模式（节点画布专属）
+   ----------------------------------------------------------------------------
+   连线和浮层是画布上唯一写死颜色的部分（其余都吃 --line / --surface-* 变量）：
+   灰线在深色纸面上要么看不见要么刺眼，这里按深色纸面重取一档。
+   ========================================================================== */
+html[data-theme="dark"] .nc-edge { stroke: #4a515c; }
+html[data-theme="dark"] .nc-edge.selected { stroke: #c3c9d1; }
+html[data-theme="dark"] .nc-edge:not([data-color]):has(+ .nc-edge-hit:hover) { stroke: #8b939e; }
+html[data-theme="dark"] .nc-edge[data-color="slate"] { stroke: #c3c9d1; }
+html[data-theme="dark"] .nc-edge[data-color="gold"] { stroke: #d9ae52; }
+html[data-theme="dark"] .nc-edge[data-color="teal"] { stroke: #4fb2ab; }
+html[data-theme="dark"] .nc-edge[data-color="rose"] { stroke: #d97b9c; }
+
+/* 缩略图上的浮标：白底 → 深底，否则压在画面上像块补丁 */
+html[data-theme="dark"] .nc-thumb-status.float { background: rgba(18, 21, 27, .92); color: var(--text); }
+
+/* 投影：深色纸上 4% 的黑影等于没有，加深一点才有「浮起来」的感觉 */
+html[data-theme="dark"] .nc-panel { box-shadow: 0 10px 32px rgba(0, 0, 0, .55); }
+html[data-theme="dark"] .nc-picker { box-shadow: 0 12px 34px rgba(0, 0, 0, .6); }
+html[data-theme="dark"] .nc-node-mention { box-shadow: 0 4px 16px rgba(0, 0, 0, .55); }
+html[data-theme="dark"] .nc-seg-item.on { box-shadow: 0 1px 3px rgba(0, 0, 0, .35); }
+
+/* 生成中连线的流光：白亮带在夜里太扎眼，压到 22% */
+html[data-theme="dark"] .nc-flow::after {
+  background-image: linear-gradient(
+    108deg,
+    transparent 38%,
+    rgba(255, 255, 255, .22) 47%,
+    rgba(201, 150, 255, .40) 50%,
+    rgba(255, 255, 255, .22) 53%,
+    transparent 62%
+  );
+}
+html[data-theme="dark"] .nc-flow::before {
+  background-image:
+    radial-gradient(closest-side, rgba(139, 114, 255, .26), transparent 70%),
+    radial-gradient(closest-side, rgba(201, 150, 255, .22), transparent 70%),
+    radial-gradient(closest-side, rgba(93, 156, 236, .16), transparent 70%);
+}
+html[data-theme="dark"] .nc-asset-btn.danger { border-color: #4d2320; }
+html[data-theme="dark"] .nc-selbar button.danger:hover { background: rgba(244, 99, 106, .16); }
+
+/* 皮肤面板：夜间模式下画布底色固定为深色纸面，那 9 档近白色不管用，说清楚别让人白点 */
+html[data-theme="dark"] .nc-skin-tones { opacity: .35; }
+.nc-skin-note { font-size: 11.5px; color: var(--text-faint); margin: -2px 0 10px; }
+.nc-skin-note[hidden] { display: none !important; }

@@ -1,0 +1,1169 @@
+{
+  "source": "D:\\Treacode\\project\\project-generation",
+  "total": 129,
+  "duplicates": 0,
+  "raw_total": 129,
+  "routes": [
+    {
+      "method": "POST",
+      "path": "/api/accounts",
+      "file": "server/index.js",
+      "start_line": 409,
+      "end_line": 409,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/accounts/:id",
+      "file": "server/index.js",
+      "start_line": 485,
+      "end_line": 485,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/accounts/:id",
+      "file": "server/index.js",
+      "start_line": 430,
+      "end_line": 430,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/accounts/:id/balance",
+      "file": "server/index.js",
+      "start_line": 674,
+      "end_line": 674,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/accounts/:id/credentials",
+      "file": "server/index.js",
+      "start_line": 475,
+      "end_line": 475,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/accounts/:id/test",
+      "file": "server/index.js",
+      "start_line": 630,
+      "end_line": 630,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/accounts/refresh-balance",
+      "file": "server/index.js",
+      "start_line": 655,
+      "end_line": 655,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/canvas/chat",
+      "file": "server/index.js",
+      "start_line": 2074,
+      "end_line": 2074,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/canvas/director",
+      "file": "server/index.js",
+      "start_line": 2049,
+      "end_line": 2049,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/canvas/director",
+      "file": "server/index.js",
+      "start_line": 2054,
+      "end_line": 2054,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/canvases",
+      "file": "server/index.js",
+      "start_line": 686,
+      "end_line": 686,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/canvases/:id",
+      "file": "server/index.js",
+      "start_line": 725,
+      "end_line": 725,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/canvases/:id",
+      "file": "server/index.js",
+      "start_line": 694,
+      "end_line": 694,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/canvases/:id/assets/:key",
+      "file": "server/index.js",
+      "start_line": 940,
+      "end_line": 940,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/canvases/:id/assets/:key",
+      "file": "server/index.js",
+      "start_line": 899,
+      "end_line": 899,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/canvases/:id/extra-params",
+      "file": "server/index.js",
+      "start_line": 2361,
+      "end_line": 2361,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/canvases/:id/inspect",
+      "file": "server/index.js",
+      "start_line": 751,
+      "end_line": 751,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/canvases/:id/run",
+      "file": "server/index.js",
+      "start_line": 2091,
+      "end_line": 2091,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/canvases/run-all",
+      "file": "server/index.js",
+      "start_line": 2103,
+      "end_line": 2103,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/doubao/accounts",
+      "file": "server/index.js",
+      "start_line": 1094,
+      "end_line": 1094,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/doubao/restart",
+      "file": "server/index.js",
+      "start_line": 1076,
+      "end_line": 1076,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/doubao/status",
+      "file": "server/index.js",
+      "start_line": 1063,
+      "end_line": 1063,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/doubao/switch-account",
+      "file": "server/index.js",
+      "start_line": 1111,
+      "end_line": 1111,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/image-import",
+      "file": "server/index.js",
+      "start_line": 1135,
+      "end_line": 1135,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/image-models",
+      "file": "server/index.js",
+      "start_line": 1014,
+      "end_line": 1014,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/image-models/:id",
+      "file": "server/index.js",
+      "start_line": 1042,
+      "end_line": 1042,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/image-models/:id",
+      "file": "server/index.js",
+      "start_line": 1029,
+      "end_line": 1029,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/image-refs",
+      "file": "server/index.js",
+      "start_line": 1197,
+      "end_line": 1197,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/image-refs/:id",
+      "file": "server/index.js",
+      "start_line": 1214,
+      "end_line": 1214,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/image-tasks",
+      "file": "server/index.js",
+      "start_line": 1051,
+      "end_line": 1051,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/image-tasks/:id",
+      "file": "server/index.js",
+      "start_line": 1272,
+      "end_line": 1272,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/image-tasks/:id/cancel",
+      "file": "server/index.js",
+      "start_line": 1262,
+      "end_line": 1262,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/image-tasks/:id/ref",
+      "file": "server/index.js",
+      "start_line": 1222,
+      "end_line": 1222,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/image-tasks/:id/retry",
+      "file": "server/index.js",
+      "start_line": 1252,
+      "end_line": 1252,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/image-tasks/:id/reuse",
+      "file": "server/index.js",
+      "start_line": 1239,
+      "end_line": 1239,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/image-tasks/:id/to-canvas",
+      "file": "server/index.js",
+      "start_line": 1284,
+      "end_line": 1284,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/image-tasks/:id/to-video",
+      "file": "server/index.js",
+      "start_line": 1898,
+      "end_line": 1898,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "PUT",
+      "path": "/api/material-line-pool",
+      "file": "server/index.js",
+      "start_line": 1421,
+      "end_line": 1421,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/material-sources",
+      "file": "server/index.js",
+      "start_line": 1388,
+      "end_line": 1388,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/material-sources/:id",
+      "file": "server/index.js",
+      "start_line": 1447,
+      "end_line": 1447,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/material-sources/:id",
+      "file": "server/index.js",
+      "start_line": 1403,
+      "end_line": 1403,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/material-sources/:id/items",
+      "file": "server/index.js",
+      "start_line": 1458,
+      "end_line": 1458,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/materials/download",
+      "file": "server/index.js",
+      "start_line": 1522,
+      "end_line": 1522,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/materials/rand/:token",
+      "file": "server/index.js",
+      "start_line": 1470,
+      "end_line": 1470,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/materials/random",
+      "file": "server/index.js",
+      "start_line": 1480,
+      "end_line": 1480,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/materials/ranking",
+      "file": "server/index.js",
+      "start_line": 1508,
+      "end_line": 1508,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/materials/search",
+      "file": "server/index.js",
+      "start_line": 1493,
+      "end_line": 1493,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/materials/to-canvas",
+      "file": "server/index.js",
+      "start_line": 1539,
+      "end_line": 1539,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/materials/to-image-ref",
+      "file": "server/index.js",
+      "start_line": 1628,
+      "end_line": 1628,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/node-assets",
+      "file": "server/node-canvas.js",
+      "start_line": 703,
+      "end_line": 703,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/node-assets",
+      "file": "server/node-canvas.js",
+      "start_line": 528,
+      "end_line": 528,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/node-assets/:id",
+      "file": "server/node-canvas.js",
+      "start_line": 722,
+      "end_line": 722,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/node-assets/:id",
+      "file": "server/node-canvas.js",
+      "start_line": 710,
+      "end_line": 710,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/node-assets/:id/purge",
+      "file": "server/node-canvas.js",
+      "start_line": 740,
+      "end_line": 740,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/node-assets/:id/restore",
+      "file": "server/node-canvas.js",
+      "start_line": 731,
+      "end_line": 731,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/node-assets/:id/to-image-ref",
+      "file": "server/node-canvas.js",
+      "start_line": 679,
+      "end_line": 679,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/node-assets/clear-trash",
+      "file": "server/node-canvas.js",
+      "start_line": 751,
+      "end_line": 751,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/node-assets/register",
+      "file": "server/node-canvas.js",
+      "start_line": 630,
+      "end_line": 630,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/node-canvases",
+      "file": "server/node-canvas.js",
+      "start_line": 381,
+      "end_line": 381,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/node-canvases/:id",
+      "file": "server/node-canvas.js",
+      "start_line": 414,
+      "end_line": 414,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/node-canvases/:id",
+      "file": "server/node-canvas.js",
+      "start_line": 390,
+      "end_line": 390,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/node-canvases/:id/chat",
+      "file": "server/node-canvas.js",
+      "start_line": 430,
+      "end_line": 430,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/node-canvases/:id/chat/:chatId",
+      "file": "server/node-canvas.js",
+      "start_line": 474,
+      "end_line": 474,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/node-canvases/:id/export",
+      "file": "server/node-canvas.js",
+      "start_line": 488,
+      "end_line": 488,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/node-canvases/import",
+      "file": "server/node-canvas.js",
+      "start_line": 507,
+      "end_line": 507,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/publish/check",
+      "file": "server/index.js",
+      "start_line": 1720,
+      "end_line": 1720,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/publish/deletable",
+      "file": "server/index.js",
+      "start_line": 1786,
+      "end_line": 1786,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/publish/filled",
+      "file": "server/index.js",
+      "start_line": 1725,
+      "end_line": 1725,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/publish/mark-deleted",
+      "file": "server/index.js",
+      "start_line": 1791,
+      "end_line": 1791,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/publish/published-by-path",
+      "file": "server/index.js",
+      "start_line": 1749,
+      "end_line": 1749,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/publish/records",
+      "file": "server/index.js",
+      "start_line": 1772,
+      "end_line": 1772,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/publish/records",
+      "file": "server/index.js",
+      "start_line": 1698,
+      "end_line": 1698,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/publish/records/:id",
+      "file": "server/index.js",
+      "start_line": 1763,
+      "end_line": 1763,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/publish/records/:id/published",
+      "file": "server/index.js",
+      "start_line": 1739,
+      "end_line": 1739,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/publish/records/:id/unpublish",
+      "file": "server/index.js",
+      "start_line": 1754,
+      "end_line": 1754,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/publish/works",
+      "file": "server/index.js",
+      "start_line": 1706,
+      "end_line": 1706,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/script-engine",
+      "file": "server/index.js",
+      "start_line": 1977,
+      "end_line": 1977,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/state",
+      "file": "server/index.js",
+      "start_line": 373,
+      "end_line": 373,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/storage",
+      "file": "server/index.js",
+      "start_line": 390,
+      "end_line": 390,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/story-model",
+      "file": "server/index.js",
+      "start_line": 1960,
+      "end_line": 1960,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/story-model",
+      "file": "server/index.js",
+      "start_line": 1964,
+      "end_line": 1964,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/storyboards",
+      "file": "server/index.js",
+      "start_line": 2001,
+      "end_line": 2001,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/storyboards",
+      "file": "server/index.js",
+      "start_line": 1986,
+      "end_line": 1986,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/storyboards/:id",
+      "file": "server/index.js",
+      "start_line": 2012,
+      "end_line": 2012,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/storyboards/:id",
+      "file": "server/index.js",
+      "start_line": 2005,
+      "end_line": 2005,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/storyboards/:id/cast",
+      "file": "server/index.js",
+      "start_line": 2020,
+      "end_line": 2020,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/storyboards/:id/draw",
+      "file": "server/index.js",
+      "start_line": 2035,
+      "end_line": 2035,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks",
+      "file": "server/index.js",
+      "start_line": 2117,
+      "end_line": 2117,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/tasks/:id",
+      "file": "server/index.js",
+      "start_line": 2351,
+      "end_line": 2351,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/tasks/:id/cancel",
+      "file": "server/index.js",
+      "start_line": 2127,
+      "end_line": 2127,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/tasks/:id/refresh-result",
+      "file": "server/index.js",
+      "start_line": 2134,
+      "end_line": 2134,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/tasks/:id/retry",
+      "file": "server/index.js",
+      "start_line": 2341,
+      "end_line": 2341,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/tasks/fetch-missing",
+      "file": "server/index.js",
+      "start_line": 2155,
+      "end_line": 2155,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/tasks/import",
+      "file": "server/index.js",
+      "start_line": 2145,
+      "end_line": 2145,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/topaz/cancel",
+      "file": "server/index.js",
+      "start_line": 2204,
+      "end_line": 2204,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/topaz/candidates",
+      "file": "server/index.js",
+      "start_line": 2186,
+      "end_line": 2186,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/topaz/clear-failed",
+      "file": "server/index.js",
+      "start_line": 2237,
+      "end_line": 2237,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/topaz/config",
+      "file": "server/index.js",
+      "start_line": 2324,
+      "end_line": 2324,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/topaz/enhance",
+      "file": "server/index.js",
+      "start_line": 2168,
+      "end_line": 2168,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/topaz/enhance-batch",
+      "file": "server/index.js",
+      "start_line": 2195,
+      "end_line": 2195,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/topaz/local",
+      "file": "server/index.js",
+      "start_line": 2252,
+      "end_line": 2252,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/topaz/local-file",
+      "file": "server/index.js",
+      "start_line": 2284,
+      "end_line": 2284,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/topaz/look",
+      "file": "server/index.js",
+      "start_line": 2333,
+      "end_line": 2333,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/topaz/restore",
+      "file": "server/index.js",
+      "start_line": 2221,
+      "end_line": 2221,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/topics",
+      "file": "server/index.js",
+      "start_line": 1691,
+      "end_line": 1691,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/topics",
+      "file": "server/index.js",
+      "start_line": 1674,
+      "end_line": 1674,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/topics",
+      "file": "server/index.js",
+      "start_line": 1662,
+      "end_line": 1662,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/topics/:id",
+      "file": "server/index.js",
+      "start_line": 1684,
+      "end_line": 1684,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/topics/used",
+      "file": "server/index.js",
+      "start_line": 1679,
+      "end_line": 1679,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/video-inputs",
+      "file": "server/index.js",
+      "start_line": 1876,
+      "end_line": 1876,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/video-inputs/:id",
+      "file": "server/index.js",
+      "start_line": 1890,
+      "end_line": 1890,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/video-models",
+      "file": "server/index.js",
+      "start_line": 1836,
+      "end_line": 1836,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/video-models/:id",
+      "file": "server/index.js",
+      "start_line": 1864,
+      "end_line": 1864,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/video-models/:id",
+      "file": "server/index.js",
+      "start_line": 1851,
+      "end_line": 1851,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/video-tasks",
+      "file": "server/index.js",
+      "start_line": 1918,
+      "end_line": 1918,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/video-tasks/:id",
+      "file": "server/index.js",
+      "start_line": 1946,
+      "end_line": 1946,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/video-tasks/:id/cancel",
+      "file": "server/index.js",
+      "start_line": 1936,
+      "end_line": 1936,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/video-tasks/:id/retry",
+      "file": "server/index.js",
+      "start_line": 1926,
+      "end_line": 1926,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/web-accounts",
+      "file": "server/index.js",
+      "start_line": 542,
+      "end_line": 542,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/web-accounts",
+      "file": "server/index.js",
+      "start_line": 546,
+      "end_line": 546,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/web-accounts/:id",
+      "file": "server/index.js",
+      "start_line": 577,
+      "end_line": 577,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/web-accounts/:id",
+      "file": "server/index.js",
+      "start_line": 559,
+      "end_line": 559,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/web-accounts/:id/commit",
+      "file": "server/index.js",
+      "start_line": 609,
+      "end_line": 609,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/web-accounts/:id/fail",
+      "file": "server/index.js",
+      "start_line": 620,
+      "end_line": 620,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/web-accounts/pick",
+      "file": "server/index.js",
+      "start_line": 588,
+      "end_line": 588,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/web-providers",
+      "file": "server/index.js",
+      "start_line": 503,
+      "end_line": 503,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/web-providers",
+      "file": "server/index.js",
+      "start_line": 507,
+      "end_line": 507,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/web-providers/:id",
+      "file": "server/index.js",
+      "start_line": 517,
+      "end_line": 517,
+      "loc": 0,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "path": "/api/web-providers/reset",
+      "file": "server/index.js",
+      "start_line": 524,
+      "end_line": 524,
+      "loc": 0,
+      "body": ""
+    }
+  ]
+}

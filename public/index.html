@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- 素材里的视频/图片是第三方 CDN 直链，很多站（如抖音 douyinvod）认 Referer：
+       带上本机地址会被判成盗链、回 403，浏览器再按 ORB 把响应拦掉 → 视频永远黑屏。
+       媒体元素（<video>）没有 referrerpolicy 属性，只能从文档级策略关掉 Referer。 -->
+  <meta name="referrer" content="no-referrer" />
+  <title>Lumen Forge · 光铸</title>
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="/nodecanvas.css" />
+  <script>
+    /* 主题必须在首帧之前定下来：app.js 是 defer，等它跑就先闪一下白屏了。
+       这里只做一件事——把「夜间 / 浅色 / 跟随系统」解析成 light|dark 写到 html 上。 */
+    (function () {
+      try {
+        var saved = localStorage.getItem('app.theme') || 'auto';
+        var dark = saved === 'dark'
+          || (saved === 'auto' && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+      } catch (_) {
+        document.documentElement.dataset.theme = 'light';
+      }
+    })();
+  </script>
+</head>
+<body data-module="self">
+  <div class="app-shell">
+    <!-- 左侧竖排导航 -->
+    <aside class="app-sidebar">
+      <div class="sidebar-brand">
+        <span class="sidebar-logo">LF</span>
+        <div class="sidebar-brand-text">
+          <strong>Lumen Forge</strong>
+          <span>光铸</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav" id="sidebarNav">
+        <button class="sidebar-item" type="button" data-module="self" title="自用画布工作台">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+          <span>自用</span>
+        </button>
+        <button class="sidebar-item" type="button" data-module="node" title="节点画布：自由编排素材与生成">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="8" height="8" rx="1"/><rect x="14" y="2" width="8" height="8" rx="1"/><rect x="2" y="14" width="8" height="8" rx="1"/><rect x="14" y="14" width="8" height="8" rx="1"/><path d="M10 6h4M10 18h4M6 10v4M18 10v4"/></svg>
+          <span>节点画布</span>
+        </button>
+        <button class="sidebar-item" type="button" data-module="video" title="AI 视频生成">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="m10 9 5 3-5 3V9Z"/></svg>
+          <span>视频生成</span>
+        </button>
+        <button class="sidebar-item" type="button" data-module="gen" title="AI 图片生成">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+          <span>图片生成</span>
+        </button>
+        <button class="sidebar-item" type="button" data-module="material" title="素材库：视频与图片">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="M3.3 7 12 12l8.7-5M12 22V12"/></svg>
+          <span>素材</span>
+        </button>
+        <button class="sidebar-item" type="button" data-module="publish" title="发布到抖音">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+          <span>发布抖音</span>
+        </button>
+        <button class="sidebar-item" type="button" data-module="toolbox" title="AI 工具箱：字幕擦除 / 声音克隆 / 人声提取">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="7" height="7" rx="1"/><rect x="14" y="4" width="7" height="7" rx="1"/><rect x="3" y="15" width="7" height="5" rx="1"/><rect x="14" y="15" width="7" height="5" rx="1"/></svg>
+          <span>AI 工具箱</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="sidebar-item" type="button" id="btnAccounts" title="账号管理">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span>账号管理</span>
+          <span class="sidebar-count" id="accCountBadge" hidden title="账号个数"></span>
+        </button>
+        <button class="sidebar-item" type="button" id="btnSettings" title="设置">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+          <span>设置</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- 右侧主内容区 -->
+    <main class="app-main">
+      <!-- 顶部细栏：模块标题 + 操作按钮 -->
+      <header class="app-topbar">
+        <div class="topbar-actions" id="selfActions">
+          <button class="btn" id="btnRefreshCoins" title="立刻重新查询所有账号在 RunningHub 的 RH 币余额">刷新 RH 币</button>
+          <button class="btn" id="btnRunAll">全部开始</button>
+          <button class="btn" id="btnAddCanvas">+ 新建画布</button>
+          <select class="cv-jump" id="cvJump" title="画布多了不好找时，从这下拉一点即跳到指定画布"></select>
+          <button class="btn" id="btnToggleParams" title="一键收起所有画布的「其他参数」；再点一下全部展开">收起参数</button>
+        </div>
+
+        <div class="topbar-actions global-actions">
+          <button class="btn" id="btnTopaz" title="用本机 Topaz 批量提升视频画质：列出还没提升的视频，勾选后一键提升">提升画质</button>
+          <button class="btn" id="btnApiTasks" title="查看各账号提交到 RunningHub 的 API 任务与结果，丢失的结果可重查取回">API 任务</button>
+          <button class="btn" id="btnOpenOutput" title="在资源管理器里打开「自用模块生成结果」目录，直接找到下载回来的成品">打开目录</button>
+          <button class="btn" id="btnShortcuts" title="查看键盘快捷键：数字键切模块、Ctrl+Enter 提交生成等">⌨ 快捷键</button>
+          <button class="btn" id="btnTheme" title="切换夜间 / 浅色模式（设置里可改成跟随系统）">夜间模式</button>
+          <button class="btn" id="btnReloadUI" title="整页重新加载：界面看着卡住、按钮点了没反应时点它">刷新界面</button>
+        </div>
+      </header>
+
+      <!-- 账号状态条（仅自用模块显示） -->
+      <div class="accounts-strip" id="accountsStrip"></div>
+
+      <!-- 内容区 -->
+      <div class="app-content">
+
+  <div id="moduleGen">
+  <!-- 子 Tab：网页生图（默认，内置浏览器去各平台薅免费额度）/ 高级 · 模型（原有 API 生图面板） -->
+  <div class="gen-tabs" id="genTabs">
+    <button class="gen-tab active" type="button" data-gtab="web">网页生图</button>
+    <button class="gen-tab" type="button" data-gtab="advanced">高级 · 模型</button>
+  </div>
+
+  <!-- 网页生图：站点书签工具栏 + 内嵌网页（每个平台一个分区，见 gen.js） -->
+  <div class="gen-pane" id="genPaneWeb">
+    <div class="gen-sitebar" id="genSiteBar">
+      <div class="gen-sites" id="genSites"></div>
+      <button class="btn tiny" type="button" id="genClearSite" title="清掉当前这个站的登录态（Cookie / 本地存储），刷新页面后重新登录即可换号刷额度">清本站登录态</button>
+      <button class="btn tiny" type="button" id="genReload" title="重新加载当前这个站：卡在「正在进行安全验证」或页面白屏时点它，通常一次就过">重新加载</button>
+      <button class="btn tiny" type="button" id="genTranslate" title="把这些英文站翻成中文：原文下面补一行译文，再点一次撤掉。翻译走 Google 免费接口，需要能走代理的网络">翻译</button>
+      <button class="btn tiny" type="button" id="genShotRef" title="把内嵌网页当前画面截下来，加到「高级 · 模型」页的参考图">截当前画面 → 参考图</button>
+      <button class="btn tiny" type="button" id="genShotResult" title="把内嵌网页当前画面截下来，登记成一条生成结果（可送入画布 / 送去视频）">截当前画面 → 生成结果</button>
+      <button class="btn tiny primary" type="button" id="genGrab" title="按当前平台的适配器去抓最新生成的那张图，不用自己手动下载">抓图</button>
+      <button class="btn tiny" type="button" id="genManageSites" title="增删改网页平台：页面地址、输入框/按钮/结果的选择器、每日额度规则，都在这儿改，改完不用重启">管理平台</button>
+      <span class="hint" id="genSiteHint"></span>
+    </div>
+    <div class="gen-web" id="genWeb"></div>
+  </div>
+
+  <!-- 网页平台管理：这些平台以前写死在代码里，现在整份存在库中，这里增删改 -->
+  <div class="modal" id="modalWebProviders" hidden>
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3>网页平台管理</h3>
+        <button class="btn tiny" type="button" id="wpClose">关闭</button>
+      </div>
+      <p class="hint">平台改版后选择器会失效：把页面上真实的选择器填回下面这几格就行，不用改代码也不用重启。
+        选择器一格填一个候选、一行一个，按顺序试，第一个命中的生效。</p>
+      <div id="wpList" class="wp-list"></div>
+      <div class="modal-foot">
+        <button class="btn tiny primary" type="button" id="wpAdd">+ 新增平台</button>
+        <button class="btn tiny" type="button" id="wpReset" title="把内置那几家（豆包/千问/元宝/智谱清言…）补回来，已存在的不会被覆盖">补回内置平台</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 高级 · 模型：原「图片生成」面板整棵子树搬到这里，元素 id 全部不变 -->
+  <div class="gen-pane" id="genPaneAdvanced" hidden>
+  <section class="gen-panel" id="genPanel">
+    <header class="gen-head">
+      <button class="gen-toggle" id="genToggle" type="button" title="展开/折叠图片生成面板">
+        <span class="gen-caret">▾</span>
+        <h2>图片生成</h2>
+        <span class="hint">火山方舟 / 智谱 / 即梦 / 通义万相 / 腾讯混元 / MiniMax / Cloudflare · 自动去水印 · 支持图生图 · 生成后可一键送入画布</span>
+      </button>
+    </header>
+    <div class="gen-body">
+      <form class="gen-form" id="genForm" autocomplete="off">
+        <div class="gen-row">
+          <span class="gen-label">模型</span>
+          <div class="gen-inline">
+            <select id="genModel" name="model" data-role="model"></select>
+            <button class="btn tiny" type="button" id="genModelManage">模型管理</button>
+          </div>
+        </div>
+        <div class="gen-row">
+          <span class="gen-label">模式</span>
+          <select id="genMode">
+            <option value="text">文生图（只按提示词画）</option>
+            <option value="image">图生图（按参考图画）</option>
+          </select>
+        </div>
+        <div class="gen-row" id="genRefRow" hidden>
+          <span class="gen-label">参考图</span>
+          <div class="gen-ref-bar">
+            <button class="btn tiny" type="button" id="genRefAdd">+ 上传参考图</button>
+            <button class="btn tiny" type="button" id="genRefAddLink" title="即梦这类只收公网图片链接的模型用">+ 图片链接</button>
+            <span class="hint" id="genRefHint"></span>
+          </div>
+          <div class="gen-ref-list" id="genRefList"></div>
+        </div>
+        <div class="gen-row">
+          <span class="gen-label">比例</span>
+          <select id="genRatio"></select>
+        </div>
+        <div class="gen-row">
+          <span class="gen-label">尺寸</span>
+          <input id="genSize" name="size" list="genSizeList" placeholder="留空 = 按比例/平台默认" autocomplete="off" />
+        </div>
+        <div class="gen-row">
+          <span class="gen-label">数量（1–4）</span>
+          <input id="genCount" name="count" type="number" min="1" max="4" value="1" />
+        </div>
+        <div class="gen-row">
+          <span class="gen-label">提示词</span>
+          <textarea id="genPrompt" name="prompt" placeholder="描述你想要的画面，例如：一位年轻女性站在城市街头，全身照，自然光"></textarea>
+        </div>
+        <button class="btn primary" type="submit" id="genSubmit">生成图片</button>
+        <div class="hint" id="genStatus"></div>
+      </form>
+    </div>
+    <input type="file" id="genRefInput" accept="image/*" multiple hidden />
+    <input type="file" id="genRefSwapInput" accept="image/*" hidden />
+  </section>
+  </div><!-- /genPaneAdvanced -->
+
+  <!-- 结果区提到模块层：网页页抓来的图也看得见 -->
+  <div class="gen-results" id="genResults"></div>
+  </div><!-- /moduleGen -->
+
+  <div id="moduleSelf">
+  <main id="canvasGrid" class="grid"></main>
+  </div>
+
+  <div id="moduleNode">
+    <div class="nc-shell">
+      <!-- 本地素材库：上传 / 缩略图 / 收藏 / 回收站 / 拖进画布 -->
+      <aside class="nc-side">
+        <header class="nc-side-head">
+          <h2>本地素材</h2>
+          <button class="btn tiny primary" type="button" id="ncUpload">+ 上传</button>
+        </header>
+        <div class="nc-chips" id="ncAssetTabs">
+          <button class="nc-chip active" type="button" data-view="all">全部</button>
+          <button class="nc-chip" type="button" data-view="favorite">收藏</button>
+          <button class="nc-chip" type="button" data-view="trash">回收站</button>
+        </div>
+        <div class="nc-chips" id="ncAssetKinds">
+          <button class="nc-chip active" type="button" data-kind="all">全部</button>
+          <button class="nc-chip" type="button" data-kind="image">图片</button>
+          <button class="nc-chip" type="button" data-kind="video">视频</button>
+          <button class="nc-chip" type="button" data-kind="audio">音频</button>
+        </div>
+        <div class="nc-asset-list" id="ncAssetList"></div>
+        <footer class="nc-side-foot" id="ncAssetFoot"></footer>
+      </aside>
+
+      <section class="nc-main">
+        <div class="nc-toolbar">
+          <select class="nc-canvas-select" id="ncCanvasSelect" title="切换节点画布"></select>
+          <button class="btn tiny" type="button" id="ncNewCanvas">+ 新建画布</button>
+          <button class="btn tiny" type="button" id="ncRenameCanvas">重命名</button>
+          <button class="btn tiny" type="button" id="ncDeleteCanvas">删除画布</button>
+          <span class="nc-sep"></span>
+          <button class="btn tiny" type="button" id="ncUndo" title="撤销 (Ctrl+Z)">↺ 撤销</button>
+          <button class="btn tiny" type="button" id="ncRedo" title="重做 (Ctrl+Y)">↷ 重做</button>
+          <span class="nc-sep"></span>
+          <button class="btn tiny" type="button" data-add="text">+ 文本</button>
+          <button class="btn tiny" type="button" data-add="image">+ 图片</button>
+          <button class="btn tiny" type="button" data-add="video">+ 视频</button>
+          <button class="btn tiny" type="button" data-add="audio">+ 音频</button>
+          <button class="btn tiny" type="button" data-add="imageGen">+ AI 生图</button>
+          <button class="btn tiny" type="button" data-add="videoGen">+ AI 视频</button>
+          <span class="nc-sep"></span>
+          <button class="btn tiny" type="button" id="ncFit" title="把所有节点缩放到看得见的范围">适应视图</button>
+          <button class="btn tiny" type="button" id="ncImport">导入 JSON</button>
+          <button class="btn tiny" type="button" id="ncExport">导出 JSON</button>
+          <span class="nc-save" id="ncSaveHint">已保存</span>
+        </div>
+        <div class="nc-viewport" id="ncViewport">
+          <!-- 画布状态条：画布名 · 节点数 · 保存态（左上角，跟内容一起漂在画布上） -->
+          <div class="nc-status" id="ncStatus">
+            <span class="nc-status-name" id="ncStatusName">画布</span>
+            <span class="nc-status-dot"></span>
+            <span id="ncStatusCount">0 节点</span>
+            <span class="nc-status-dot"></span>
+            <span class="nc-status-save" id="ncStatusSave">已保存</span>
+          </div>
+          <!-- AI 编导跑批条：分镜铺好后常驻在顶部中间，随时一键生成 / 看进度 -->
+          <div class="nc-runbar" id="ncRunBar" hidden>
+            <span class="nc-runbar-dot" aria-hidden="true"></span>
+            <span class="nc-runbar-name" id="ncRunBarName">分镜</span>
+            <span class="nc-runbar-stat" id="ncRunBarStat"></span>
+            <button type="button" class="nc-runbar-go" id="ncRunBarGo" title="按「定妆照 → 镜头图 → 镜头视频」分波次跑，每波出结果再跑下一波">一键生成</button>
+            <button type="button" class="nc-runbar-stop" id="ncRunBarStop" title="不再提交后面的节点；已经提交的任务会继续跑完" hidden>停止</button>
+            <button type="button" class="nc-runbar-x" id="ncRunBarClose" title="收起这条（不会删节点）">
+              <svg viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2.6 2.6l6.8 6.8M9.4 2.6l-6.8 6.8"/></svg>
+            </button>
+          </div>
+          <!-- 多选浮动工具条：选中 ≥2 个节点时浮在选区上方 -->
+          <div class="nc-selbar" id="ncSelBar" hidden>
+            <span class="nc-selbar-count" id="ncSelBarCount">2 节点</span>
+            <span class="nc-selbar-sep"></span>
+            <button type="button" data-selact="layout" title="按行列排整齐（T）">布局</button>
+            <button type="button" data-selact="align" title="对齐：左 / 上 / 水平居中 / 垂直居中">对齐</button>
+            <button type="button" data-selact="group" title="打组（Ctrl+G）">打组</button>
+            <button type="button" data-selact="copy" title="复制（Ctrl+C）">复制</button>
+            <button type="button" data-selact="dup" title="创建副本（Ctrl+D）">副本</button>
+            <button type="button" data-selact="del" title="删除（Delete）" class="danger">删除</button>
+          </div>
+          <!-- 对齐子菜单：贴在「对齐」按钮下方 -->
+          <div class="nc-selmenu" id="ncSelMenu" hidden>
+            <button type="button" data-align="left">左对齐</button>
+            <button type="button" data-align="hcenter">水平居中</button>
+            <button type="button" data-align="right">右对齐</button>
+            <button type="button" data-align="top">顶部对齐</button>
+            <button type="button" data-align="vcenter">垂直居中</button>
+            <button type="button" data-align="bottom">底部对齐</button>
+            <span class="nc-selmenu-sep"></span>
+            <button type="button" data-align="hdist">水平等距</button>
+            <button type="button" data-align="vdist">垂直等距</button>
+          </div>
+          <div class="nc-grid" aria-hidden="true"></div>
+          <div class="nc-flow" aria-hidden="true"></div>
+          <div class="nc-world" id="ncWorld">
+            <svg class="nc-edges" id="ncEdges"></svg>
+            <div class="nc-nodes" id="ncNodes"></div>
+          </div>
+          <div class="nc-empty" id="ncEmpty">
+            <p>空白画布</p>
+            <p class="hint">双击画布 = 新建文本节点 · 点一下节点 = 打开编辑面板 · 滚轮 = 缩放 · 按住空格拖动 = 平移画布</p>
+            <p class="hint">连线：从节点两侧的圆点拖出来，拖到另一个节点松手；拖到空白处可以直接新建并连接</p>
+            <p class="hint">懒得一个个搭？按 <b>D</b>（或工具条「编导」）打开右侧聊天窗，贴一段剧本就自动铺好分镜、镜头图和视频，再点「一键生成」</p>
+          </div>
+          <!-- 左下角：缩放 + 快捷键（跟 MiniMax 一样把视图控制放左下，底部中间留给工具条） -->
+          <div class="nc-zoombar" id="ncZoombar">
+            <button type="button" id="ncZoomOut" title="缩小">−</button>
+            <button type="button" id="ncZoomLevel" title="点击恢复 100%">100%</button>
+            <button type="button" id="ncZoomIn" title="放大">+</button>
+            <span class="nc-zoombar-sep"></span>
+            <button type="button" id="ncZoomFit" title="适应视图（F）">⤢</button>
+            <button type="button" id="ncFullscreen" title="全屏">⛶</button>
+            <span class="nc-zoombar-sep"></span>
+            <button type="button" id="ncShortcutBtn" title="快捷键一览（?）">快捷键</button>
+          </div>
+          <!-- 画布工具条（底部浮动胶囊）：选择/移动 · 加节点 · 整理 · 连线 · 视图 -->
+          <div class="nc-vtools" id="ncViewTools">
+            <button type="button" class="nc-vtool-ai" data-vtool="director" title="AI 编导（D）：右侧聊天窗，贴剧本自动铺分镜，也能直接说「第 3 镜改成雨夜」">
+              <svg viewBox="0 0 14 14" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1.7 4.9h10.6v7H1.7z"/><path d="M1.7 4.9l1.15-2.4h9.2l1.15 2.4"/><path d="M4.9 2.5L3.75 4.9M7.7 2.5L6.55 4.9M10.5 2.5L9.35 4.9"/></svg>
+              <span>编导</span>
+            </button>
+            <button type="button" class="nc-vtool-sep" tabindex="-1" aria-hidden="true"></button>
+            <button type="button" data-vtool="pan" title="平移 / 小手模式（H）：拖动空白处移动画布，Esc 退出">✥</button>
+            <button type="button" data-vtool="add" title="新建节点（A）">＋</button>
+            <button type="button" data-vtool="tidy" title="一键整理（T）：把节点按行列排整齐">▦</button>
+            <button type="button" class="nc-vtool-sep" tabindex="-1" aria-hidden="true"></button>
+            <button type="button" data-vtool="edges" title="连线显示（L）：全部 / 仅选中 / 隐藏">⌁</button>
+            <button type="button" data-vtool="cut" title="剪断连线（C）：点一下连线就断开">✂</button>
+            <button type="button" data-vtool="snap" title="对齐吸附（S）：拖动时贴齐其它节点的边与中线">⊹</button>
+            <button type="button" class="nc-vtool-sep" tabindex="-1" aria-hidden="true"></button>
+            <button type="button" data-vtool="minimap" title="小地图（M）">▣</button>
+            <button type="button" data-vtool="skin" title="画布皮肤（底纹 + 底色）">◐</button>
+            <button type="button" data-vtool="find" title="画布内查找（Ctrl+F）">⌕</button>
+            <button type="button" data-vtool="cmd" title="命令面板（Ctrl+K）">⌘</button>
+            <button type="button" data-vtool="help" title="快捷键一览（?）">?</button>
+          </div>
+
+          <!-- 节点编辑面板：单选一个节点时从底部滑出（MiniMax Design 式），
+               画布上的卡片只留缩略图，模型/提示词/参数都在这里改 -->
+          <div class="nc-panel" id="ncPanel" hidden>
+            <div class="nc-panel-head">
+              <span class="nc-panel-title" id="ncPanelTitle">节点</span>
+              <span class="nc-panel-hint">Esc 收起</span>
+              <span class="nc-panel-actions">
+                <button type="button" id="ncPanelLocate" title="视图对准这个节点（Shift+F）"><svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="6" cy="6" r="3.4"/><path d="M6 .8v2M6 9.2v2M.8 6h2M9.2 6h2" stroke-linecap="round"/></svg></button>
+                <button type="button" id="ncPanelClose" title="收起（Esc）"><svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><path d="M2.5 2.5l7 7M9.5 2.5l-7 7"/></svg></button>
+              </span>
+            </div>
+            <div class="nc-panel-body" id="ncPanelBody"></div>
+          </div>
+
+          <!-- 画布皮肤：底色 9 档 + 底纹 3 种 -->
+          <div class="nc-skin" id="ncSkin" hidden>
+            <div class="nc-skin-box">
+              <header>
+                <span>画布皮肤</span>
+                <button type="button" id="ncSkinClose" title="关闭（Esc）">✕</button>
+              </header>
+              <div class="nc-skin-group">
+                <div class="nc-skin-title">底色</div>
+                <div class="nc-skin-note" id="ncSkinNote" hidden></div>
+                <div class="nc-skin-tones" id="ncSkinTones"></div>
+              </div>
+              <div class="nc-skin-group">
+                <div class="nc-skin-title">底纹</div>
+                <div class="nc-skin-patterns" id="ncSkinPatterns"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- AI 编导 · 画布内聊天窗：贴在画布右侧常驻，贴剧本 / 改某一镜 / 一键生成都在对话里说 -->
+          <aside class="nc-chat" id="ncChat" hidden>
+            <header class="nc-chat-head">
+              <span class="nc-chat-mark" aria-hidden="true">
+                <svg viewBox="0 0 14 14" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"><path d="M7 1.4l1.5 3.4 3.7.4-2.8 2.5.8 3.6L7 9.5l-3.2 1.8.8-3.6L1.8 5.2l3.7-.4z"/></svg>
+              </span>
+              <span class="nc-chat-titles">
+                <span class="nc-chat-title">编导</span>
+                <span class="nc-chat-sub" id="ncChatSub">贴剧本，我铺分镜</span>
+              </span>
+              <button type="button" class="nc-chat-icon nc-chat-icon-label" id="ncChatHistoryBtn" title="历史对话：点一段就接着聊，也能删掉不要的">
+                <svg viewBox="0 0 14 14" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><path d="M2.2 7a4.8 4.8 0 1 0 1.6-3.6"/><path d="M2 1.9v2.4h2.4"/><path d="M7 4.4V7l1.9 1.2"/></svg>
+                <span>历史</span>
+              </button>
+              <button type="button" class="nc-chat-icon" id="ncChatGear" title="参数：镜头数 / 画风 / 画幅 / 模型">
+                <svg viewBox="0 0 14 14" width="13" height="13" fill="currentColor"><circle cx="7" cy="3" r="1.15"/><circle cx="7" cy="7" r="1.15"/><circle cx="7" cy="11" r="1.15"/></svg>
+              </button>
+              <button type="button" class="nc-chat-icon" id="ncChatClose" title="收起（Esc）">
+                <svg viewBox="0 0 12 12" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M2.4 2.4l7.2 7.2M9.6 2.4l-7.2 7.2"/></svg>
+              </button>
+            </header>
+
+            <div class="nc-chat-params" id="ncChatParams" hidden>
+              <div class="nc-chat-grid">
+                <label class="nc-chat-field">
+                  <span>镜头数</span>
+                  <select id="ncDirShots" class="nc-chat-select"></select>
+                </label>
+                <label class="nc-chat-field">
+                  <span>画风</span>
+                  <select id="ncDirStyle" class="nc-chat-select"></select>
+                </label>
+                <label class="nc-chat-field">
+                  <span>画幅 · 全部镜头</span>
+                  <select id="ncDirRatio" class="nc-chat-select"></select>
+                </label>
+                <label class="nc-chat-field">
+                  <span>出图</span>
+                  <select id="ncDirImageModel" class="nc-chat-select"></select>
+                </label>
+                <label class="nc-chat-field">
+                  <span>视频</span>
+                  <select id="ncDirVideoModel" class="nc-chat-select"></select>
+                </label>
+              </div>
+              <div class="nc-chat-model-line">
+                <span class="nc-chat-hint">写剧本的模型</span>
+                <button type="button" class="btn tiny" id="ncDirModelBtn">…</button>
+              </div>
+              <p class="nc-chat-hint" id="ncDirHint" hidden></p>
+            </div>
+
+            <div class="nc-chat-history" id="ncChatHistory" hidden>
+              <div class="nc-chat-history-head">
+                <span>历史对话</span>
+                <span class="nc-chat-history-count" id="ncChatHistoryCount"></span>
+              </div>
+              <div class="nc-chat-history-list" id="ncChatHistoryList"></div>
+            </div>
+
+            <div class="nc-chat-log" id="ncChatLog"></div>
+
+            <div class="nc-chat-quick" id="ncChatQuick">
+              <button type="button" data-quick="run" hidden>一键生成</button>
+              <button type="button" data-quick="ratio" hidden title="把画布上所有镜头改成同一个画幅">统一尺寸</button>
+              <button type="button" data-quick="more">再加两镜</button>
+              <button type="button" data-quick="reset">新对话</button>
+            </div>
+
+            <!-- 待发送的参考图：上传完显示在这里，点 × 撤掉 -->
+            <div class="nc-chat-photos" id="ncChatPhotos" hidden></div>
+
+            <form class="nc-chat-compose" id="ncChatForm">
+              <button type="button" class="nc-chat-pick" id="ncChatPick" title="带上人物参考图（最多 4 张）：先从本地素材库挑，库里没有可再上传">
+                <svg viewBox="0 0 14 14" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"><rect x="1.6" y="2.6" width="10.8" height="8.8" rx="1.4"/><circle cx="4.9" cy="5.6" r="1"/><path d="M2.2 10.2l3-3 2.4 2.2 2-1.8 2.2 2.6"/></svg>
+              </button>
+              <input type="file" id="ncChatFile" accept="image/png,image/jpeg,image/webp,image/gif" multiple hidden />
+              <textarea id="ncChatInput" rows="1" spellcheck="false"
+                placeholder="贴一段剧本，或说：第 3 镜改成雨夜，运镜慢一点。也可以 Ctrl+V 直接贴人物图"></textarea>
+              <button type="submit" class="nc-chat-send" id="ncChatSend" title="发送（回车，Shift+回车换行）">
+                <svg viewBox="0 0 14 14" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round"><path d="M1.6 7L12.4 1.9 9.7 12.1 7.1 8.1z"/><path d="M7.1 8.1L12.4 1.9"/></svg>
+              </button>
+            </form>
+          </aside>
+
+          <!-- 挑人物参考图：默认列本地素材库里的图，不用每次重新上传 -->
+          <div class="nc-libpick" id="ncLibPick" hidden>
+            <div class="nc-libpick-box" role="dialog" aria-label="从本地素材选">
+              <header class="nc-libpick-head">
+                <span class="nc-libpick-title">从本地素材选</span>
+                <span class="nc-libpick-hint" id="ncLibPickHint"></span>
+                <button type="button" class="nc-chat-icon" id="ncLibPickClose" title="关闭（Esc）">✕</button>
+              </header>
+              <div class="nc-libpick-grid" id="ncLibPickGrid"></div>
+              <footer class="nc-libpick-foot">
+                <button type="button" class="btn tiny" id="ncLibPickUpload">上传新图</button>
+                <button type="button" class="btn tiny primary" id="ncLibPickOk">加入</button>
+              </footer>
+            </div>
+          </div>
+
+          <!-- 小地图：整张画布的缩略图，点一下把视口移过去 -->
+          <div class="nc-minimap" id="ncMinimap" hidden>
+            <canvas id="ncMinimapCanvas" width="200" height="130"></canvas>
+          </div>
+
+          <!-- 画布内查找 -->
+          <div class="nc-find" id="ncFind" hidden>
+            <input type="text" id="ncFindInput" placeholder="在画布中查找节点…（回车下一个）" autocomplete="off" />
+            <span class="nc-find-count" id="ncFindCount">0/0</span>
+            <button type="button" id="ncFindPrev" title="上一个（Shift+回车）">↑</button>
+            <button type="button" id="ncFindNext" title="下一个（回车）">↓</button>
+            <button type="button" id="ncFindClose" title="关闭（Esc）">✕</button>
+          </div>
+
+          <!-- 命令面板 -->
+          <div class="nc-cmd" id="ncCmd" hidden>
+            <div class="nc-cmd-box">
+              <input type="text" id="ncCmdInput" placeholder="搜索命令或节点…（↑↓ 选择，回车执行）" autocomplete="off" />
+              <div class="nc-cmd-list" id="ncCmdList"></div>
+            </div>
+          </div>
+
+          <!-- 快捷键一览 -->
+          <div class="nc-help" id="ncHelp" hidden>
+            <div class="nc-help-box">
+              <header>
+                <h3>画布快捷键</h3>
+                <button type="button" id="ncHelpClose" title="关闭（Esc）">✕</button>
+              </header>
+              <div class="nc-help-grid" id="ncHelpGrid"></div>
+            </div>
+          </div>
+
+          <div class="nc-guides" id="ncGuides" hidden>
+            <div class="nc-guide nc-guide-v" id="ncGuideV"></div>
+            <div class="nc-guide nc-guide-h" id="ncGuideH"></div>
+          </div>
+          <div class="nc-marquee" id="ncMarquee" hidden></div>
+          <div class="nc-menu" id="ncMenu" hidden></div>
+        </div>
+      </section>
+    </div>
+    <input type="file" id="ncAssetInput" accept="image/*,video/*,audio/*" multiple hidden />
+    <input type="file" id="ncImportInput" accept=".json,application/json" hidden />
+    <input type="file" id="ncNodeFileInput" hidden />
+  </div>
+
+  <!-- AI 工具箱：字幕擦除 / 声音克隆 / 人声提取 -->
+  <div id="moduleToolbox">
+    <div class="tb-head">
+      <h2>AI 工具箱</h2>
+      <p class="tb-sub">字幕擦除 · 声音克隆 · 人声提取 —— 点击工具直接在右侧内嵌窗口使用，无需切换浏览器</p>
+    </div>
+    <div class="tb-layout">
+      <div class="tb-list" id="tbList">
+        <button class="tb-card" type="button" data-tool="subtitle">
+          <span class="tb-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M6 14h5m2 0h5M6 17h7m3 0h2M8 8h8"/></svg>
+          </span>
+          <span class="tb-name">字幕擦除</span>
+          <span class="tb-desc">去除视频中的硬字幕 / 水印文字</span>
+        </button>
+        <button class="tb-card" type="button" data-tool="voice-clone">
+          <span class="tb-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2M12 19v3m-4 0h8"/></svg>
+          </span>
+          <span class="tb-name">声音克隆</span>
+          <span class="tb-desc">克隆一段参考音频的音色，用于文字转语音</span>
+        </button>
+        <button class="tb-card" type="button" data-tool="voice-extract">
+          <span class="tb-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10v4m4-7v10m4-13v16m4-13v10m4-7v4"/></svg>
+          </span>
+          <span class="tb-name">人声提取</span>
+          <span class="tb-desc">从歌曲中分离人声 / 伴奏，拿到干净人声</span>
+        </button>
+      </div>
+      <div class="tb-stage" id="tbStage">
+        <div class="tb-empty" id="tbEmpty">
+          <p>← 选一个工具开始使用</p>
+          <p class="hint">网页工具在内嵌窗口中打开，登录态独立保存，不影响主程序</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="moduleVideo">
+    <!-- 视频模块内两个子 Tab：单任务工作台（原有）/ 分镜（AI 编小剧场） -->
+    <div class="vd-tabs" id="vdTabs">
+      <button class="vd-tab" type="button" data-vtab="single">单个视频</button>
+      <button class="vd-tab" type="button" data-vtab="story">分镜（小剧场）</button>
+    </div>
+
+    <div class="vd-pane" id="vdPaneSingle">
+    <section class="vd-workbench">
+      <header class="vd-head">
+        <h2>视频生成</h2>
+        <button class="btn tiny" type="button" id="vdModelManage">视频模型管理</button>
+        <span class="hint" id="vdModelHint"></span>
+      </header>
+      <div class="vd-body">
+        <form class="vd-form" id="vdForm" autocomplete="off">
+          <div class="gen-row">
+            <span class="gen-label">模型</span>
+            <select id="vdModel"></select>
+          </div>
+          <div class="gen-row">
+            <span class="gen-label">输入图</span>
+            <div class="vd-input-bar">
+              <button class="btn tiny" type="button" id="vdInputAdd">+ 上传输入图</button>
+              <button class="btn tiny" type="button" id="vdInputClear">清空</button>
+              <span class="hint" id="vdInputHint">作为视频首帧，也可在自用模块的结果图点「送去视频」</span>
+            </div>
+            <div class="vd-input-preview" id="vdInputPreview"></div>
+          </div>
+          <div class="gen-row">
+            <span class="gen-label">提示词</span>
+            <textarea id="vdPrompt" placeholder="描述镜头运动与画面变化，例如：镜头缓慢推近，人物轻轻转头微笑"></textarea>
+          </div>
+          <div class="gen-row vd-params">
+            <span class="gen-label">参数</span>
+            <div class="vd-param-bar">
+              <label>时长 <select id="vdDuration"></select></label>
+              <label><span id="vdResLabel">分辨率</span> <select id="vdResolution"></select></label>
+              <label id="vdRatioWrap">比例 <select id="vdRatio"></select></label>
+              <span class="hint" id="vdRatioNote"></span>
+              <label>种子 <input id="vdSeed" placeholder="留空随机" autocomplete="off" /></label>
+            </div>
+          </div>
+          <button class="btn primary" type="submit" id="vdSubmit">生成视频</button>
+          <div class="hint" id="vdStatus"></div>
+        </form>
+        <div class="vd-result" id="vdResult"></div>
+      </div>
+    </section>
+    <section class="vd-history" id="vdHistory"></section>
+    <input type="file" id="vdInputFile" accept="image/*" hidden />
+    </div><!-- /vdPaneSingle -->
+
+    <!-- 分镜（小剧场）：AI 编剧本 → 角色定妆照 → 按镜头批量出图 -->
+    <div class="vd-pane" id="vdPaneStory" hidden>
+      <section class="sb-workbench">
+        <header class="sb-head">
+          <h2>分镜 · 小剧场</h2>
+          <button class="btn tiny" type="button" id="sbModelManage">剧本模型</button>
+          <button class="btn tiny" type="button" id="sbNew">+ 新建剧本</button>
+          <select id="sbPick" title="切换要看的剧本"></select>
+          <span class="hint" id="sbHint"></span>
+        </header>
+
+        <!-- 新建剧本：给个题材 + 镜头数 + 画风，让 AI 编 -->
+        <div class="sb-create" id="sbCreate" hidden>
+          <div class="gen-row">
+            <span class="gen-label">人物图（可选，最多 4 张）</span>
+            <div class="sb-photo-bar">
+              <button class="btn tiny" type="button" id="sbPhotoAdd">+ 上传人物图</button>
+              <span class="hint" id="sbPhotoHint">给了图，AI 会照着图里的人写角色，人物就是你指定的人</span>
+            </div>
+            <div class="sb-photo-list" id="sbPhotoList"></div>
+          </div>
+          <div class="gen-row">
+            <span class="gen-label">题材（可留空，AI 自己编）</span>
+            <input id="sbIdea" placeholder="例如：咖啡店一见钟情 / 地铁上捡到一只猫 / 校园暗恋" autocomplete="off" />
+          </div>
+          <div class="gen-row">
+            <span class="gen-label">画风</span>
+            <select id="sbStyle"></select>
+          </div>
+          <div class="sb-create-row">
+            <label>镜头数 <input id="sbShotCount" type="number" min="3" max="12" value="6" /></label>
+            <button class="btn primary" type="button" id="sbWrite">AI 写剧本</button>
+            <button class="btn tiny" type="button" id="sbCancelNew">取消</button>
+            <span class="hint" id="sbCreateHint"></span>
+          </div>
+        </div>
+
+        <div class="sb-stage" id="sbStage"></div>
+      </section>
+      <input type="file" id="sbPhotoInput" accept="image/*" multiple hidden />
+    </div><!-- /vdPaneStory -->
+  </div>
+
+  <div id="moduleMaterial">
+    <section class="mat-workbench">
+      <header class="mat-head">
+        <div class="mat-subtabs" id="matSubtabs">
+          <button class="mat-subtab" type="button" data-kind="video">视频</button>
+          <button class="mat-subtab" type="button" data-kind="image">图片</button>
+        </div>
+        <select id="matSource" title="选择素材分类：每个分类一条独立接口"></select>
+        <button class="btn tiny" type="button" id="matReload">刷新</button>
+        <button class="btn tiny" type="button" id="matManage">接口管理</button>
+        <!-- 内嵌抖音：选到「抖音采集」分类时露出来。在页面里刷，点视频上的「＋」就加进画布 -->
+        <div class="mat-douyin" id="matDouyin" hidden>
+          <select id="matDyTarget" title="先选一个画布的视频参数；之后在抖音页点「＋」加到它、「图」加到图片生成的参考图"></select>
+          <span class="hint" id="matDyHint"></span>
+        </div>
+        <span class="hint" id="matHint"></span>
+      </header>
+
+      <div class="mat-stage">
+        <div class="mat-search" id="matSearch" hidden>
+          <div class="mat-search-tabs" id="matSearchTabs">
+            <button class="mat-search-tab" type="button" data-tab="random">随机人物</button>
+            <button class="mat-search-tab" type="button" data-tab="keyword">关键词搜索</button>
+            <button class="mat-search-tab" type="button" data-tab="rank">排行榜</button>
+          </div>
+          <div class="mat-search-bar">
+            <button class="btn primary mat-random-btn" type="button" id="matRandomGo" title="全图库随机一批二次元人物插画（不指定关键词）">🎲 随机二次元人物</button>
+            <input
+              id="matSearchInput"
+              type="search"
+              placeholder="搜人物图片，如：美杜莎 斗破苍穹 / 云曦 完美世界 / 雷电将军 原神 / 初音未来"
+              autocomplete="off"
+            />
+            <select id="matSearchSource" title="图源：二次元优先，通用图走必应"></select>
+            <select id="matRankMode" title="榜单：pixiv 官方排行榜" hidden></select>
+            <button class="btn tiny primary" type="button" id="matSearchGo">搜索</button>
+            <button class="btn tiny" type="button" id="matSearchMore" hidden>换一批</button>
+            <span class="hint" id="matSearchHint"></span>
+          </div>
+          <div class="mat-search-grid" id="matSearchGrid"></div>
+        </div>
+        <div class="mat-view" id="matView">
+          <button class="mat-arrow" type="button" id="matPrev" title="上一个（← 方向键）" aria-label="上一个">‹</button>
+          <div class="mat-single-wrap">
+            <span class="mat-pos hint" id="matPos"></span>
+            <div class="mat-single" id="matGrid"></div>
+          </div>
+          <button class="mat-arrow" type="button" id="matNext" title="下一个（→ 方向键）" aria-label="下一个">›</button>
+        </div>
+        <!-- 抖音工具栏：这几个按钮在「我们自己的页面」里，不依赖抖音的 DOM，
+             点了一定有反应 —— 「＋」把当前正在看的那条视频加进画布，「截屏」把当前画面
+             存成参考图，「复制链接」抓不到直链时兜底。 -->
+        <div class="mat-dybar" id="matDyBar" hidden>
+          <button class="btn tiny primary" type="button" id="matDyAdd">＋ 当前视频加画布</button>
+          <button class="btn tiny" type="button" id="matDyShot" title="把当前播放画面截下来当参考图（所见即所得，不会被裁剪）">截当前画面 → 参考图</button>
+          <button class="btn tiny" type="button" id="matDyCopy">复制视频链接</button>
+          <button class="btn tiny" type="button" id="matDyChromeLogin" title="抖音的登录风控会拦内嵌浏览器（二维码刷不出、验证码发不出去）。点这里会打开你电脑上的 Chrome，在 Chrome 里登录一次，登录态自动搬回程序">🌐 用 Chrome 登录</button>
+          <!-- 缩放：抖音是竖屏站，宽窗口里内容只占中间一条，靠这个把页面放大看 -->
+          <span class="mat-dyzoom" title="把抖音页面整体放大 / 缩小（Ctrl + 滚轮也行）">
+            <button class="btn tiny" type="button" id="matDyZoomOut" title="缩小">－</button>
+            <button class="btn tiny" type="button" id="matDyZoomVal" title="点一下恢复 100%">100%</button>
+            <button class="btn tiny" type="button" id="matDyZoomIn" title="放大">＋</button>
+          </span>
+          <button class="btn tiny" type="button" id="matDyBig" title="把抖音铺满整个窗口看（再点一下还原）；按 Esc 也能还原">⛶ 放大</button>
+          <span class="hint" id="matDyBarHint">刷到喜欢的：点开它放大播放，再点左边「＋ 当前视频加画布」；想留链接就点「复制视频链接」</span>
+        </div>
+        <!-- 内嵌抖音的网页就挂在这里（选到「抖音采集」分类时由 materials.js 创建并显示） -->
+        <div class="mat-web" id="matWeb" hidden></div>
+      </div>
+    </section>
+  </div>
+
+
+  <div id="modulePublish">
+    <section class="pub-workbench">
+      <aside class="pub-panel" id="pubPanel">
+        <h2 class="pub-title">发布抖音 <span class="hint">半自动：程序只负责上传和填表，「发布」由你在右边页面亲自点</span></h2>
+
+        <div class="gen-row">
+          <span class="gen-label">选视频</span>
+          <div class="pub-inline">
+            <button class="btn tiny primary" type="button" id="pubPickFile">选择本地视频…</button>
+            <button class="btn tiny" type="button" id="pubPickWork" title="从程序里自己生成的视频中挑（视频生成模块的成品、自用模块的画布结果），不用去翻文件夹">从我的作品里挑</button>
+            <span class="hint" id="pubLocalName">未选择</span>
+          </div>
+          <input type="hidden" id="pubLocalPath" />
+          <!-- 已选视频的预览：光看文件名认不出是哪条，填表前先确认一下 -->
+          <div class="pub-picked" id="pubPicked" hidden></div>
+          <!-- 防重发提示条：选中已发过的视频 / 填过表还没发，都在这里说清楚 -->
+          <p class="pub-dup" id="pubDup" hidden></p>
+        </div>
+
+        <!-- 发布记录：发过什么一目了然，也用来防「下一条又发成上一条」 -->
+        <div class="pub-hist" id="pubHistBox">
+          <div class="pub-hist-head">
+            <span class="pub-hist-title">发布记录</span>
+            <span class="hint" id="pubHistSummary"></span>
+            <span class="pub-hist-gap"></span>
+            <button class="btn tiny" type="button" id="pubHistToggle">展开</button>
+            <button class="btn tiny" type="button" id="pubHistClean" title="把「已发布」的视频文件从本地清掉，腾磁盘空间。会先列出清单让你确认，删的进系统回收站（可恢复）">删除已发布视频…</button>
+            <button class="btn tiny" type="button" id="pubHistClear" title="清空所有发布记录（清空后就认不出哪条发过了）">清空记录</button>
+          </div>
+          <div class="pub-hist-list" id="pubHistList" hidden></div>
+        </div>
+
+        <div class="gen-row">
+          <span class="gen-label">作品描述</span>
+          <textarea id="pubDesc" placeholder="发布时的作品描述（会自动带上话题）"></textarea>
+        </div>
+        <div class="gen-row">
+          <span class="gen-label">话题</span>
+          <div class="pub-topics">
+            <div class="pub-topics-bar">
+              <input id="pubSearchKeyword" type="search" placeholder="一句话描述这条视频（如：二次元 紫发 跳舞）" autocomplete="off" />
+              <button class="btn tiny primary" type="button" id="pubSearchSimilar" title="用关键词在抖音搜索同类视频，把它们的文案和话题抓回来给你勾">搜相似视频出话题</button>
+              <button class="btn tiny" type="button" id="pubScrapeTopics" title="视频上传到抖音后，从右边页面抓抖音按内容推荐的话题（上传后再点更准）">抓抖音推荐话题</button>
+              <button class="btn tiny" type="button" id="pubPickLibTopics" title="从你在「素材 → 抖音采集」里加过的视频话题里挑（加素材时自动攒下来的）">从素材话题挑</button>
+            </div>
+            <span class="hint" id="pubTopicHint">选完视频会自动把文件名填进上面，点「搜相似视频出话题」去抖音搜同类作品</span>
+            <!-- 素材话题库：点「从素材话题挑」展开 -->
+            <div class="pub-lib" id="pubLibBox" hidden>
+              <div class="pub-lib-head">
+                <input id="pubLibSearch" type="search" placeholder="筛选话题…" autocomplete="off" />
+                <button class="btn tiny" type="button" id="pubLibAll">全选</button>
+                <button class="btn tiny" type="button" id="pubLibNone">全不选</button>
+                <button class="btn tiny primary" type="button" id="pubLibApply">填进话题</button>
+                <button class="btn tiny" type="button" id="pubLibClear" title="清空整个素材话题库（不影响已发布的视频）">清空库</button>
+                <span class="hint" id="pubLibCount"></span>
+              </div>
+              <div class="pub-lib-list" id="pubLibList"></div>
+              <p class="hint pub-lib-tip">
+                这些是你在「素材 → 抖音采集」里加视频时自动记下来的话题。用过的会排在前面。
+              </p>
+            </div>
+            <div class="pub-topic-list" id="pubTopicList" hidden></div>
+            <div class="pub-topic-apply" id="pubSimActions" hidden>
+              <button class="btn tiny primary" type="button" id="pubSimApply">把勾选的填进描述 + 话题</button>
+              <span class="hint" id="pubSimCount"></span>
+            </div>
+            <div class="pub-topic-chips" id="pubTopicChips" hidden></div>
+            <input id="pubTags" placeholder="手动补充话题（空格分隔，可留空）" autocomplete="off" />
+          </div>
+        </div>
+
+        <div class="gen-row">
+          <span class="gen-label">封面</span>
+          <div class="pub-src">
+            <label><input type="radio" name="pubCover" id="pubCoverDefault" checked /> 默认（取视频画面）</label>
+            <label><input type="radio" name="pubCover" id="pubCoverPick" /> 本地图</label>
+            <button class="btn tiny" type="button" id="pubPickCover">选择封面图…</button>
+            <span class="hint" id="pubCoverName"></span>
+          </div>
+          <input type="hidden" id="pubCoverPath" />
+        </div>
+
+        <div class="gen-row">
+          <span class="gen-label">定时发布</span>
+          <div class="pub-inline">
+            <label class="switch"><input type="checkbox" id="pubScheduleOn" />开启</label>
+            <input type="datetime-local" id="pubSchedule" title="抖音只接受 2 小时后 ~ 14 天内的定时" />
+          </div>
+        </div>
+
+        <div class="pub-actions">
+          <button class="btn primary" type="button" id="pubGo">自动上传并填写</button>
+          <button class="btn" type="button" id="pubMarkDone" title="在右边页面点完「发布」后点这里：记下这条已发出，并把表单清空，免得下一条又发成它">✓ 已发布，记一笔</button>
+          <button class="btn" type="button" id="pubRetry" title="中断了接着来：已上传的视频不会重传">重试</button>
+          <button class="btn" type="button" id="pubManualCopy" title="把「文案 + 话题」复制到剪贴板，自己去右边页面粘贴（手动模式）">复制文案</button>
+          <button class="btn" type="button" id="pubDryRun" title="演练：按真实流程把表填一遍，绝不碰「发布」">演练（只填不发）</button>
+          <button class="btn tiny" type="button" id="pubDetach" title="把自动操作从页面撤下来，完全手动">脱离自动模式</button>
+        </div>
+
+        <p class="hint" id="pubStatus"></p>
+        <div class="pub-log" id="pubLog"></div>
+        <p class="hint pub-note">
+          第一次用先在右边页面登录抖音（和「素材 → 抖音采集」共用一个登录态，登过就不用再登）。
+          程序弹出滑块 / 验证时会停下来，手动完成验证后点「重试」继续。
+        </p>
+      </aside>
+      <div class="pub-stage" id="pubStage">
+        <div class="pub-web" id="pubWeb"></div>
+      </div>
+    </section>
+  </div>
+
+      </div><!-- /.app-content -->
+    </main>
+  </div><!-- /.app-shell -->
+
+  <div class="modal" id="modalSettings" hidden>
+    <div class="modal-card">
+      <header class="modal-head">
+        <h2>设置</h2>
+        <button class="icon-btn" data-close title="关闭">✕</button>
+      </header>
+      <div class="modal-body">
+        <div class="settings-row">
+          <div class="settings-row-head">外观</div>
+          <div class="settings-row-hint">
+            夜间模式会连画布底色一起压暗。选「跟随系统」时，跟着 Windows 的深浅色设置自动切换。
+          </div>
+          <div class="seg" id="themeSeg">
+            <button type="button" data-theme="light">浅色</button>
+            <button type="button" data-theme="dark">夜间</button>
+            <button type="button" data-theme="auto">跟随系统</button>
+          </div>
+        </div>
+        <p class="modal-tip" style="margin-top:0">
+          程序产生的文件分门别类放在下面这些目录里。想放到别的盘就点「更改」选一个文件夹 ——
+          <strong>原来已经下载的文件会被一起搬过去</strong>，历史记录里的图片 / 视频不会失效。
+        </p>
+        <table class="storage-table">
+          <thead>
+            <tr><th>位置</th><th>当前目录</th><th>操作</th></tr>
+          </thead>
+          <tbody id="storageRows"></tbody>
+        </table>
+        <p class="modal-tip">
+          账号、画布、素材接口这些配置存在<strong>数据目录</strong>的 <code>db.json</code> 里：
+          <code id="storageDataDir"></code>（这个目录固定不改，要换请用启动参数 <code>RH_DATA_DIR</code>）。
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="modalApiTasks" hidden>
+    <div class="modal-card api-task-card">
+      <header class="modal-head">
+        <h2>账号 API 任务</h2>
+        <button class="icon-btn" data-close title="关闭">✕</button>
+      </header>
+      <div class="modal-body">
+        <p class="modal-tip" style="margin-top:0">
+          这里列出各账号提交到 RunningHub 的任务与结果。历史任务如果「扣了币却没拿回结果」，
+          点开它再点「重新查询结果」——程序会按<b>远端任务号</b>向平台取回最新状态和结果，并下载到本地。
+          <b>只查不重发</b>，不会再次扣费。本地结果文件被删了也不用慌：点「<b>一键取回所有结果</b>」，
+          会把所有「本地文件已丢失」的任务重新取回来，统一存到<b>输出目录下当天日期</b>的文件夹里。
+        </p>
+        <div class="api-task-filters">
+          <select id="apiTaskAccount" title="按账号筛选；「按任务号取回」也用这个账号"></select>
+          <select id="apiTaskStatus" title="按状态筛选">
+            <option value="">全部状态</option>
+            <option value="pending">进行中</option>
+            <option value="success">成功</option>
+            <option value="failed">失败 / 取消</option>
+          </select>
+          <input id="apiTaskSearch" placeholder="按画布名 / 远端任务号搜索" autocomplete="off" />
+          <button class="btn tiny" type="button" id="apiTaskReload">刷新列表</button>
+          <button class="btn tiny" type="button" id="apiTaskFetchAll" title="把所有「本地结果文件已丢失」的任务，按远端任务号重新取回，结果存到输出目录下当天日期的文件夹里；只查不重发，不重新扣费">一键取回所有结果</button>
+          <span class="hint" id="apiTaskHint"></span>
+        </div>
+        <div class="api-task-import">
+          <span class="api-task-import-label">按任务号取回</span>
+          <input id="apiTaskRemoteId" placeholder="粘贴平台上的任务号，如 2105984078233952258" autocomplete="off" />
+          <button class="btn tiny primary" type="button" id="apiTaskImport">取回结果</button>
+          <span class="hint">用上面选中的账号去查；本地没有记录的平台任务也能这样补回来</span>
+        </div>
+        <table class="api-task-table">
+          <thead>
+            <tr><th>预览</th><th>时间</th><th>账号</th><th>画布</th><th>状态</th><th>远端任务号</th><th>结果</th><th></th></tr>
+          </thead>
+          <tbody id="apiTaskRows"></tbody>
+        </table>
+        <div id="apiTaskDetail" class="api-task-detail" hidden></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="modalTopaz" hidden>
+    <div class="modal-card topaz-card">
+      <header class="modal-head">
+        <h2>提升画质（内置引擎）</h2>
+        <button class="icon-btn" data-close title="关闭">✕</button>
+      </header>
+      <div class="modal-body">
+        <p class="modal-tip" style="margin-top:0">
+          这里列出<strong>还没提升画质</strong>的视频结果，勾选（或全选）后点「一键提升」即可。
+          除了程序自己生成的视频，也可以在下面<strong>贴一个本机文件夹路径</strong>，把里面的视频一起列出来（来源标「本地」）。
+          固定跑<strong>Chronos 插帧到 60fps → Proteus 放大 2×（1080p → 4K，恢复压缩 80 / 恢复细节 60 / 锐化 10） → 质感调色 → H265/NVIDIA 出片</strong>这一套，不开运动模糊脱模。下面可以选质感，默认「不增亮」：只把皮肤最亮的那一档高光压回去，暗部和中调一点不动，不会越提升越白；想完全不动色调就选「自然」。
+          这一版刻意<strong>不追求「更锐」</strong>：放大倍数从 4× 降到 2×、锐化只给 10，为的是少出塑料感和振铃，画面更接近真实拍摄。
+          画质引擎<strong>已随软件一起安装</strong>，不需要另外装 Topaz。
+          提升后的文件统一存到<strong>「画质提升结果」目录</strong>（默认在输出目录的 topaz 文件夹，可在设置里改位置），原片不会被删，随时可在下方「已提升」里还原。
+        </p>
+        <div id="topazBody"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="modalAccounts" hidden>
+    <div class="modal-card">
+      <header class="modal-head">
+        <h2>账号管理</h2>
+        <button class="icon-btn" data-close title="关闭">✕</button>
+      </header>
+      <div class="modal-body">
+        <form id="accountForm" class="account-form">
+          <input name="name" placeholder="账号名称，如 账号 A" autocomplete="off" />
+          <div class="key-field">
+            <input name="apiKey" placeholder="API Key" autocomplete="off" />
+            <p class="key-src"><a href="https://www.runninghub.cn/" target="_blank" rel="noreferrer">去 RunningHub 拿 Key（用户中心 → API Key）↗</a></p>
+          </div>
+          <select name="site" title="账号注册在哪个站：两边是两套独立账号，API Key 也要从对应的站拿">
+            <option value="cn">国内站 · runninghub.cn</option>
+            <option value="ai">国际站 · runninghub.ai</option>
+          </select>
+          <input name="concurrency" type="number" min="1" max="10" value="1" title="该账号允许同时运行的任务数" />
+          <button class="btn primary" type="submit">添加账号</button>
+        </form>
+        <p class="modal-tip">每个账号的 API Key 只保存在本机数据目录的 <code>db.json</code> 中，不会外传。并发上限默认 1：3 个账号即可同时跑 3 个视频任务。<br />「额度」是该账号每 24 小时可成功生成的次数（默认 1）：生成成功后扣一次，用尽即进入冷却、不再接单，满 24 小时后自动刷新并重新可用；填 0 表示不限制。</p>
+        <div class="claim-bar" id="claimBar" hidden>
+          <label class="switch" title="每天到点自动带着登录态访问一次 RunningHub，领回每日赠送的 RH 币"><input type="checkbox" id="claimEnabled" />每天自动领 RH 币</label>
+          <input type="time" id="claimTime" title="每天自动领取的时间" />
+          <button class="btn tiny primary" type="button" id="btnClaimNow">立即领取</button>
+          <span class="hint" id="claimHint"></span>
+        </div>
+        <div class="claim-bar" id="keepBar" hidden>
+          <label class="switch" title="登录态是 cookie，放着不动会过期。开启后每天到点用隐藏窗口访问一次 RunningHub，保持账号活跃并把到期倒计时写回库里。注意：实测站点不会因为访问而重发令牌（见 tools/rh-refresh-probe.mjs），所以它不能替代重新登录，只是让你提前知道哪天要重登"><input type="checkbox" id="keepEnabled" />每天自动访问一次（提醒到期）</label>
+          <input type="time" id="keepTime" title="每天自动保活的时间（建议避开领币时间）" />
+          <button class="btn tiny" type="button" id="btnKeepNow">立即保活</button>
+          <span class="hint" id="keepHint"></span>
+        </div>
+        <div class="account-tools">
+          <button class="btn tiny" type="button" id="btnCopyAllAccounts" title="把上面的账号全部复制到剪贴板，每行一个：名称 → 站点 → API Key">复制全部账号</button>
+          <span class="acc-total" id="accTotalStat">共 0 个账号</span>
+          <span class="hint">每行一个：名称 ⇥ 站点 ⇥ API Key（Tab 分隔，方便粘进表格或备份）</span>
+        </div>
+        <div id="accountList" class="account-list"></div>
+
+        <!-- 网页平台账号：豆包/千问/元宝这类靠网页登录态的平台，一个账号一份免费额度 -->
+        <div class="webacc-block" id="webaccBlock" hidden>
+          <div class="webacc-head">
+            <h4>网页平台账号 · 额度池</h4>
+            <span class="hint">这些平台的免费额度跟着账号走：多绑几个号额度就叠加，哪个号今天用完了会自动跳过换下一个。</span>
+          </div>
+          <div class="webacc-add">
+            <select id="waProvider" title="选一个平台"></select>
+            <input id="waName" class="wa-name" placeholder="给这个账号起个名字，如「豆包-小号2」" spellcheck="false" />
+            <button class="btn tiny primary" type="button" id="waAdd">+ 添加账号</button>
+          </div>
+          <div id="webAccountList" class="account-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="modalImageModels" hidden>
+    <div class="modal-card">
+      <header class="modal-head">
+        <h2>图片模型管理</h2>
+        <button class="icon-btn" data-close title="关闭">✕</button>
+      </header>
+      <div class="modal-body">
+        <form id="imageModelForm" class="image-model-form" autocomplete="off">
+          <input name="name" placeholder="模型名称，如 豆包 Seedream 4.0" autocomplete="off" />
+          <select name="protocol" title="协议">
+            <option value="ark">火山方舟豆包（ark）</option>
+            <option value="zhipu">智谱 CogView（免费，zhipu）</option>
+            <option value="jimeng">即梦图片 4.0（AK/SK，jimeng）</option>
+            <option value="wanxiang">通义万相（百炼，wanxiang）</option>
+            <option value="hunyuan">腾讯混元生图（TokenHub，hunyuan）</option>
+            <option value="minimax">MiniMax 海螺（minimax）</option>
+            <option value="cloudflare">Cloudflare FLUX.2（免费，cloudflare）</option>
+            <option value="doubao">豆包客户端（本机免 Key，doubao）</option>
+            <option value="openai">OpenAI 兼容（openai）</option>
+          </select>
+          <input name="baseUrl" placeholder="接口地址，如 https://ark.cn-beijing.volces.com/api/v3" autocomplete="off" />
+          <div class="key-field">
+            <input name="apiKey" placeholder="API Key" autocomplete="off" />
+            <p class="key-src" id="imKeySrc"></p>
+          </div>
+          <input name="akSecret" placeholder="AccessKeySecret（仅即梦协议需要）" autocomplete="off" hidden />
+          <input name="accountId" placeholder="Cloudflare 账号 ID（仅 cloudflare 协议需要）" autocomplete="off" hidden />
+          <input name="model" list="arkModelList" placeholder="模型 ID，如 doubao-seedream-4-0-250828" autocomplete="off" />
+          <input name="size" list="genSizeList" placeholder="默认尺寸，如 2K" autocomplete="off" />
+          <label class="switch"><input type="checkbox" name="noWatermark" checked />自动去水印</label>
+          <label class="switch"><input type="checkbox" name="supportsImageInput" />支持图生图</label>
+          <input name="extraParams" placeholder='{"seed": 12345}' autocomplete="off" />
+          <button class="btn primary" type="submit">添加模型</button>
+        </form>
+        <p class="modal-tip">「额外参数」是 JSON 对象，原样并入请求体，用于补充厂商特有参数，例如 <code>{"seed": 12345}</code>。API Key 只保存在本机数据目录的 <code>db.json</code> 中，不会外传。</p>
+        <div id="imageModelList" class="image-model-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="modalVideoModels" hidden>
+    <div class="modal-card">
+      <header class="modal-head">
+        <h2>视频模型管理</h2>
+        <button class="icon-btn" data-close title="关闭">✕</button>
+      </header>
+      <div class="modal-body">
+        <form id="videoModelForm" class="image-model-form" autocomplete="off">
+          <input name="name" placeholder="模型名称，如 智谱 CogVideoX-Flash" autocomplete="off" />
+          <select name="provider" title="服务商"></select>
+          <input name="baseUrl" placeholder="接口地址" autocomplete="off" />
+          <div class="key-field">
+            <input name="apiKey" placeholder="API Key" autocomplete="off" />
+            <p class="key-src" id="vdKeySrc"></p>
+          </div>
+          <input name="model" list="vdModelIdList" placeholder="模型 ID，如 cogvideox-flash" autocomplete="off" />
+          <select name="defaultDuration" title="默认时长"></select>
+          <select name="defaultResolution" title="默认分辨率"></select>
+          <select name="defaultRatio" title="默认比例"></select>
+          <input name="extraParams" placeholder='{"seed": 12345}' autocomplete="off" />
+          <button class="btn primary" type="submit">添加模型</button>
+        </form>
+        <p class="modal-tip" id="vdProviderTip"></p>
+        <div id="videoModelList" class="image-model-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 剧本模型：AI 编导（剧本 → 分镜）用哪个对话模型 -->
+  <div class="modal" id="modalStoryModel" hidden>
+    <div class="modal-card">
+      <header class="modal-head">
+        <h2>剧本模型</h2>
+        <button class="icon-btn" data-close title="关闭">✕</button>
+      </header>
+      <div class="modal-body">
+        <form id="storyModelForm" class="image-model-form" autocomplete="off">
+          <select name="engine" title="编导引擎">
+            <option value="api">云端模型（OpenAI 兼容接口，要 Key）</option>
+            <option value="doubao">本地豆包（白嫖，要开着豆包窗口）</option>
+          </select>
+          <select name="scriptEngine" title="写剧本的引擎">
+            <option value="">不写剧本（直接拆你给的内容）</option>
+            <option value="codex">本地 GPT 写剧本（白嫖，要装 Codex 并登录）</option>
+          </select>
+          <div class="key-field">
+            <p class="key-src" id="scriptEngineSrc"></p>
+            <button class="btn" type="button" id="scriptEngineProbe">检测本地 GPT</button>
+          </div>
+          <input name="baseUrl" list="storyBaseList" placeholder="接口地址，如 https://open.bigmodel.cn/api/paas/v4" autocomplete="off" />
+          <input name="model" list="storyModelList" placeholder="模型 ID，如 glm-4.5-flash" autocomplete="off" />
+          <div class="key-field">
+            <input name="apiKey" placeholder="API Key（留空 = 不修改）" autocomplete="off" />
+            <p class="key-src" id="storyKeySrc"></p>
+          </div>
+          <button class="btn primary" type="submit">保存</button>
+        </form>
+        <p class="modal-tip">
+          「AI 编导」把剧本拆成分镜就靠这个模型。只要 OpenAI 兼容的 <code>/chat/completions</code> 接口都行。
+          智谱免费档实测：<code>glm-4.5-flash</code> 最守指令（分镜最长、地点不乱跳），
+          <code>glm-4-flash-250414</code> 常被代码围栏包住解析失败，别用。
+        </p>
+        <p class="modal-tip">
+          想完全白嫖就把引擎换成<b>本地豆包</b>：它直接在你开着的豆包窗口里打字、把回复取回来，
+          不需要接口地址和 Key。实测它写分镜比免费对话模型听话得多（不会自己编故事、地点不漏）。
+          代价是每次编导都会占用豆包窗口（先点「新对话」清上下文），一版分镜约 10~30 秒。
+        </p>
+        <p class="modal-tip">
+          注意：豆包窗口只有一个。豆包正在生成图片或视频时，编导会先停下来让路，
+          否则它一点「新对话」就把那个视频对话切走了，视频任务会永远等不到自己的片子。
+          想同时干活就临时切回云端模型。
+        </p>
+        <p class="modal-tip">
+          <b>写剧本</b>是另一步：实测豆包拆 JSON 分镜很稳，但写故事很平 —— 给它一句题材，
+          拆出来就是几个平铺的动作；本地 GPT 反过来，故事有层次，可它守 JSON 格式容易跑偏。
+          所以可以分两层：<b>本地 GPT 先写一版剧本 → 豆包把剧本拆成分镜</b>。
+          只在「你给的不是完整剧本」时才触发，你已经贴了整份剧本就原样拿去拆，不会被改写。
+          写一版剧本实测 20~40 秒，失败会退回「直接按你给的题材拆」并如实说明。
+        </p>
+        <div id="storyModelHint" class="hint"></div>
+      </div>
+    </div>
+  </div>
+
+  <datalist id="storyBaseList">
+    <option value="https://open.bigmodel.cn/api/paas/v4"></option>
+    <option value="https://api.deepseek.com/v1"></option>
+    <option value="https://dashscope.aliyuncs.com/compatible-mode/v1"></option>
+    <option value="https://ark.cn-beijing.volces.com/api/v3"></option>
+  </datalist>
+  <datalist id="storyModelList">
+    <option value="glm-4.5-flash"></option>
+    <option value="glm-4.5-air"></option>
+    <option value="glm-4.6"></option>
+    <option value="deepseek-chat"></option>
+    <option value="qwen-plus"></option>
+  </datalist>
+
+  <div class="modal" id="modalMaterialSources" hidden>
+    <div class="modal-card">
+      <header class="modal-head">
+        <h2>素材接口管理</h2>
+        <button class="icon-btn" data-close title="关闭">✕</button>
+      </header>
+      <div class="modal-body">
+        <div class="mat-pool-block">
+          <label class="mat-pool-label" for="matLinePool">全局线路池（所有「随机短片线路池」分类共用，一行一个基地址）</label>
+          <textarea id="matLinePool" rows="3" placeholder="只填域名根，不带编号：&#10;https://node1.example.com&#10;https://node2.example.com"></textarea>
+          <div class="mat-pool-row">
+            <button class="btn tiny primary" type="button" id="matPoolSave">保存线路池</button>
+            <span class="hint" id="matPoolHint"></span>
+          </div>
+        </div>
+        <form id="materialSourceForm" class="image-model-form" autocomplete="off">
+          <input name="name" list="matCategoryNames" placeholder="分类名称，如 热舞 / 慢摇 / COS 二创图" autocomplete="off" />
+          <select name="kind" title="类型">
+            <option value="video">视频（跳舞素材）</option>
+            <option value="image">图片（COS 二创人物图）</option>
+          </select>
+          <select name="mode" title="接口类型">
+            <option value="api">普通接口（返回素材列表）</option>
+            <option value="m3u8">随机短片线路池（m3u8）</option>
+            <option value="redirect">随机直链接口（302 跳随机 mp4/图片）</option>
+          </select>
+          <input name="count" type="number" min="1" max="48" placeholder="一次拉几条（默认 8）" autocomplete="off" />
+          <input name="clip" placeholder="短片编号（线路池模式：拼 基地址/编号.m3u8）" autocomplete="off" />
+          <textarea name="lines" rows="4" placeholder="线路池模式：可留空，走上面的全局线路池 + 编号&#10;普通接口：一行一个完整地址，失败自动换下一条&#10;https://api.example.com/list&#10;https://node2.example.com/1.m3u8" autocomplete="off"></textarea>
+          <div class="key-field">
+            <input name="apiKey" placeholder="API Key（可选，填了自动加进请求头）" autocomplete="off" />
+            <p class="hint" style="margin-top:4px">请求头名默认 <code>Authorization</code>，前缀默认 <code>Bearer </code>，不需要可留空</p>
+          </div>
+          <input name="apiKeyHeader" placeholder="请求头名（默认 Authorization）" autocomplete="off" />
+          <input name="apiKeyPrefix" placeholder="Key 前缀（默认 Bearer ，没有前缀就清空）" autocomplete="off" />
+          <input name="headers" placeholder='请求头（JSON），如 {"Referer": "https://x.com"}' autocomplete="off" />
+          <input name="itemsPath" placeholder="列表路径（JSON 点路径），如 data.list；留空自动找" autocomplete="off" />
+          <input name="urlField" placeholder="地址字段名，如 play_url / image_url；留空自动挑" autocomplete="off" />
+          <input name="extraParams" placeholder='额外参数（JSON），并入请求地址，如 {"type": "hot"}' autocomplete="off" />
+          <button class="btn primary" type="submit">添加分类</button>
+        </form>
+        <p class="modal-tip">
+          <b>随机直链接口</b>（如 api.yujn.cn）：在分类的「线路地址」填接口地址（一行一个，失败自动换），请求后服务器 302 跳到一段<b>随机 mp4 / 一张随机图片</b>，程序连着请求「一次拉几条」次攒成一批供轮播翻看，每次刷新都是新内容。<br />
+          <b>随机短片线路池</b>（原 App 的做法）：线路域名集中在上面「全局线路池」里维护，每个分类只填一个<b>短片编号</b>，程序自动拼成 <code>基地址/编号.m3u8</code>。节点域名整批失效时，<b>只改全局线路池一处</b>，所有分类跟着换。<br />
+          <b>普通接口</b>：在分类的「线路地址」里填完整列表接口（JSON 里「列表路径 / 地址字段」留空会自动推断），不走全局线路池。<br />
+          线路按顺序试、失败自动换下一条，并记住上次能用的那条；随机源每请求一次就是另一段素材，m3u8 靠内置 hls.js 播放、下载自动合并分片，随机直链直接播放、下载原样保存。<br />
+          「列表路径 / 地址字段」只对普通接口有效；地址字段留空时优先挑名字不带 watermark 的地址。
+        </p>
+        <div id="materialSourceList" class="image-model-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <datalist id="genSizeList"></datalist>
+  <!-- 「图片模型管理」里那个「默认尺寸」必须用自己的 datalist：
+       和生成面板共用一份时，两边会交替覆盖 dataset.sig，
+       而状态轮询 1.5 秒一次、远比用户操作频繁，结果弹窗里恒显示生成面板那套候选 -->
+  <datalist id="imageModelSizeList"></datalist>
+  <datalist id="arkModelList"></datalist>
+  <datalist id="vdModelIdList"></datalist>
+  <!-- 素材分类名候选：照搬目标 App「蛋蛋分享库」随机美女页的 12 个分类，省得手打 -->
+  <datalist id="matCategoryNames">
+    <option value="资源3"></option>
+    <option value="热舞"></option>
+    <option value="变装"></option>
+    <option value="慢摇"></option>
+    <option value="清纯"></option>
+    <option value="JK"></option>
+    <option value="美腿"></option>
+    <option value="萝莉"></option>
+    <option value="黑丝1"></option>
+    <option value="白丝1"></option>
+    <option value="甜妹1"></option>
+  </datalist>
+
+  <div class="modal" id="modalShortcuts" hidden>
+    <div class="modal-card shortcuts-card">
+      <header class="modal-head">
+        <h2>键盘快捷键</h2>
+        <button class="icon-btn" data-close title="关闭">✕</button>
+      </header>
+      <div class="modal-body">
+        <p class="modal-tip" style="margin-top:0">
+          在输入框里打字时，下面这些快捷键不会生效，免得误触。随时按 <kbd>Esc</kbd> 关掉这个窗口。
+        </p>
+        <div class="shortcut-grid" id="shortcutGrid"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="modalConfirm" hidden>
+    <div class="modal-card confirm-card">
+      <header class="modal-head">
+        <h2 id="confirmTitle">确认操作</h2>
+        <button class="icon-btn" data-close title="关闭">✕</button>
+      </header>
+      <div class="modal-body">
+        <p class="confirm-msg" id="confirmMsg"></p>
+      </div>
+      <footer class="modal-foot">
+        <button class="btn" id="confirmCancel" type="button">取消</button>
+        <button class="btn danger" id="confirmOk" type="button">确定</button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- 从「我的作品」里挑要发布的视频：程序自己生成的那些，不用去翻文件夹 -->
+  <div class="modal" id="modalPubWork" hidden>
+    <div class="modal-card confirm-card pub-work-card">
+      <header class="modal-head">
+        <h2>从我的作品里挑</h2>
+        <button class="icon-btn" data-close title="关闭">✕</button>
+      </header>
+      <div class="modal-body">
+        <p class="hint pub-work-tip">
+          程序里自己生成的视频都在这里（视频生成模块的成品、自用模块的画布结果）。
+          已经用 Topaz 提升过画质的会标出来。
+        </p>
+        <div class="pub-work-list" id="pubWorkList"></div>
+      </div>
+      <footer class="modal-foot">
+        <span class="hint" id="pubWorkFoot"></span>
+        <button class="btn" id="pubWorkCancel" type="button">取消</button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- 删除已发布视频：先摊开清单让人看清「删什么、跳过什么」，确认后才动手 -->
+  <div class="modal" id="modalPubClean" hidden>
+    <div class="modal-card confirm-card pub-clean-card">
+      <header class="modal-head">
+        <h2>删除已发布的视频文件</h2>
+        <button class="icon-btn" data-close title="关闭">✕</button>
+      </header>
+      <div class="modal-body">
+        <div class="pub-clean" id="pubCleanBody"></div>
+      </div>
+      <footer class="modal-foot">
+        <span class="hint" id="pubCleanFoot"></span>
+        <button class="btn" id="pubCleanCancel" type="button">取消</button>
+        <button class="btn danger" id="pubCleanOk" type="button">移入回收站</button>
+      </footer>
+    </div>
+  </div>
+
+  <button class="back-to-top" id="backToTop" type="button" hidden title="回到顶部">↑</button>
+
+  <div id="toast" class="toast" hidden></div>
+  <!-- hls.js：Chromium 不带 HLS 能力，m3u8 素材只能靠它播（UMD 版，挂到 window.Hls） -->
+  <script src="/vendor/hls.min.js" defer></script>
+  <script src="/video.js" defer></script>
+  <script src="/storyboard.js" defer></script>
+  <script src="/materials.js" defer></script>
+  <script src="/publish.js" defer></script>
+  <script src="/gen.js" defer></script>
+  <script src="/toolbox.js" defer></script>
+  <script src="/nodecanvas.js" defer></script>
+  <script src="/app.js" defer></script>
+</body>
+</html>
