@@ -1,7 +1,14 @@
 # Lumen Forge · Python 版
 
+[![CI](https://github.com/2004liu10/lumen-forge-py/actions/workflows/ci.yml/badge.svg)](https://github.com/2004liu10/lumen-forge-py/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/python-3.11%20%7C%203.12%20%7C%203.13-blue.svg)](pyproject.toml)
+
 原项目 `project-generation`（Electron + Express + 手写前端，约 42k 行 JS）的 Python 重写。
 **前端原样复用**，后端换成 FastAPI + SQLite，对外 `/api` 契约与原版逐条一致。
+
+多画布 AI 生成工作台：RunningHub 动作迁移、文生图 / 图生图（9 种上游协议）、
+文生视频 / 图生视频（4 家）、无限画布、分镜剧本、素材抓取、多账号并发调度。
 
 ## 快速开始
 
